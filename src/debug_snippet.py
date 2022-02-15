@@ -1,5 +1,4 @@
-from curses import baudrate
-from socket import timeout
+
 import sys
 import glob
 import serial
@@ -9,7 +8,7 @@ import pynmea2
 
 def serial_ports():
     """ Lists serial port names
-
+        
         :raises EnvironmentError:
             On unsupported or unknown platforms
         :returns:
@@ -40,10 +39,12 @@ def serial_ports():
 if __name__ == '__main__':
     with serial.Serial('/dev/ttyS0', baudrate = 4800, timeout = 1 ) as ser:
         for i in range (15):
+            
             line = ser.readline().decode('ascii', 'ignore')
             obj = pynmea2.parse(line)
+            
             if(obj.sentence_type == 'DPT'):
-                print(f'Some depth data for you, NMEA GOD: {obj.depth}')
+                print(f'Some depth data for you, NMEA GOD: DEPTH = {obj.depth} meters')
             elif(obj.sentence_type == 'GGA'):
                 print(f'Some coordinates for you, NMEA GOD: LAT = {obj.latitude}, LON = {obj.longitude} ')
             else:
