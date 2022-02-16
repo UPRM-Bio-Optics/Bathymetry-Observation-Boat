@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from dronekit import connect
 from datetime import date
+from time import sleep
 
 
 def graph2d(lon, lat, topo):
@@ -102,7 +103,9 @@ def run():
                     
                     if row[0] != 0 and row[1] != 0 and row [2] != 0:
                         writer.writerow(row)
-                        
+                        time.sleep(1)
+                    
+                    
                 are_empty = lat.size == 0 or lon.size == 0 or topo.size == 0
                 if not _scannable and not are_empty:
                     break
