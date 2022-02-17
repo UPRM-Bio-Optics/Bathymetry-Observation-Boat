@@ -101,7 +101,7 @@ def run():
                         row[0] = nmea_object.latitude
                         row[1] = nmea_object.longitude
                     
-                    if not any(row):
+                    if all(row):
                         writer.writerow(row)
                         time.sleep(1)
                     
