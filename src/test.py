@@ -101,7 +101,7 @@ def run():
                         row[0] = nmea_object.latitude
                         row[1] = nmea_object.longitude
                     
-                    if row[0] != 0 and row[1] != 0 and row [2] != 0:
+                    if not any(row):
                         writer.writerow(row)
                         time.sleep(1)
                     
@@ -109,9 +109,10 @@ def run():
                 are_empty = lat.size == 0 or lon.size == 0 or topo.size == 0
                 if not _scannable and not are_empty:
                     break
-            csvfile.close()
-            graph2d(lon, lat, topo)
-            graph3d(lon, lat, topo)
+        
+        csvfile.close()
+        graph2d(lon, lat, topo)
+        graph3d(lon, lat, topo)
     except:
         run()
 
