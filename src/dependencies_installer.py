@@ -15,8 +15,6 @@ subprocess.check_call([sys.executable, '-m', 'pip', 'install',
 subprocess.check_call([sys.executable, '-m', 'pip', 'install', 
 'datetime'])
 subprocess.check_call([sys.executable, '-m', 'pip', 'install', 
-'time'])
-subprocess.check_call([sys.executable, '-m', 'pip', 'install', 
 'numpy'])
 
 
