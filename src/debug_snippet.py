@@ -41,7 +41,8 @@ if __name__ == '__main__':
         for i in range (15):
             
             line = ser.readline().decode('ascii', 'ignore')
-            obj = pynmea2.parse(line)
+            if line.startswith('$'):
+                obj = pynmea2.parse(line)
             
             if(obj.sentence_type == 'DPT'):
                 print(f'Some depth data for you, NMEA GOD: DEPTH = {obj.depth} meters')
