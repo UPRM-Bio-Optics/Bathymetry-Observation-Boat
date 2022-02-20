@@ -1,7 +1,9 @@
+from configparser import ParsingError
 import numpy
 import serial
 import pynmea2
 import os
+import csv
 import numpy as np
 import scipy.interpolate
 import matplotlib.pyplot as plt
@@ -73,48 +75,53 @@ def run():
     topo = np.array([])
     today = date.today()
 
+    are_empty = lat.size == 0 or lon.size == 0 or topo.size == 0
+
     csvfile = open(os.getcwd() + f'/src/Data/depth_data - ' +
-                today.strftime("%b-%d-%Y") + '.csv')
+                   today.strftime("%b-%d-%Y") + '.csv')
     writer = csv.writer(csvfile)
     _header = ['Latitude', 'Longitude', 'Depth in Meters']
     writer.writerow(_header)
 
-    try:
-        vehicle = connect(_vehicle_port, baudrate=115200, heartbeat_timeout=10)
-        _scannable = vehicle.mode == 'AUTO' or vehicle.mode == 'LOITER' or vehicle.mode == 'MANUAL'
+    vehicle = connect(_vehicle_port, baud=115200, heartbeat_timeout=10)
+    cmds = vehicle.commands
+    cmds.download()
+    cmds.wait_ready()
+    missionlist = []
+    for cmd in cmds:
+        missionlist.append(cmd)
 
-        with serial.Serial(_echoounder_port, baudrate=4800, timeout=2) as ser:
-            while True:
-                while _scannable:
-                    line = ser.readline().decode('ascii', 'ignore')
-                    nmea_object = pynmea2.parse(line)
-                    row = [0, 0, 0]
-                    
-                    if nmea_object.sentence_type == 'DPT':
-                        np.append(topo, nmea_object.depth)
-                        row[2] = nmea_object.depth
-                        
-                    elif nmea_object.sentence_type == 'GGA':
-                        np.append(lat, nmea_object.latitude)
-                        np.append(lon, nmea_object.longitude)
-                        
-                        row[0] = nmea_object.latitude
-                        row[1] = nmea_object.longitude
-                    
-                    if all(row):
-                        writer.writerow(row)
-                        time.sleep(1)
-                    
-                    
-                are_empty = lat.size == 0 or lon.size == 0 or topo.size == 0
-                if not _scannable and not are_empty:
-                    break
-        
-        csvfile.close()
-        graph2d(lon, lat, topo)
-        graph3d(lon, lat, topo)
-    except:
-        run()
+    _scannable = (vehicle.mode == 'AUTO' or vehicle.mode ==
+                'LOITER' or vehicle.mode == 'MANUAL') and cmds.next <= len(missionlist)
+
+    with serial.Serial(_echoounder_port, baudrate=4800, timeout=2) as ser:
+        while _scannable:
+            try:
+                line = ser.readline().decode('ascii', 'ignore')
+                nmea_object = pynmea2.parse(line)
+                row = [None, None, None]
+            except ParsingError:
+                continue
+
+            if nmea_object.sentence_type == 'DPT':
+                np.append(topo, nmea_object.depth)
+                row[2] = nmea_object.depth
+
+            elif nmea_object.sentence_type == 'GGA':
+                np.append(lat, nmea_object.latitude)
+                np.append(lon, nmea_object.longitude)
+
+                row[0] = nmea_object.latitude
+                row[1] = nmea_object.longitude
+
+            if all(row):
+                writer.writerow(row)
+                sleep(1)
+
+    csvfile.close()
+    graph2d(lon, lat, topo)
+    graph3d(lon, lat, topo)
+
 
 if __name__ == '__main__':
     run()
