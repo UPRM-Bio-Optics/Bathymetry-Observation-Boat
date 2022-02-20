@@ -42,6 +42,8 @@ if __name__ == '__main__':
             try:
                 obj = pynmea2.parse(line)
             except ParsingError:
+                print(f'Could Not Parse Data: {line} ')
+                print(line.startswith('$'))
                 continue
 
             if obj.sentence_type == 'DPT':
