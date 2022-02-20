@@ -83,7 +83,7 @@ def run():
     _header = ['Latitude', 'Longitude', 'Depth in Meters']
     writer.writerow(_header)
 
-    vehicle = connect(_vehicle_port, baud=115200, heartbeat_timeout=10)
+    vehicle = connect(_vehicle_port, baud=115200, heartbeat_timeout=5)
     cmds = vehicle.commands
     cmds.download()
     cmds.wait_ready()
@@ -106,18 +106,18 @@ def run():
             if nmea_object.sentence_type == 'DPT':
                 np.append(topo, nmea_object.depth)
                 row[2] = nmea_object.depth
-
+                
             elif nmea_object.sentence_type == 'GGA':
                 np.append(lat, nmea_object.latitude)
                 np.append(lon, nmea_object.longitude)
-
+                
                 row[0] = nmea_object.latitude
                 row[1] = nmea_object.longitude
 
             if all(row):
                 writer.writerow(row)
                 sleep(1)
-
+                
     csvfile.close()
     graph2d(lon, lat, topo)
     graph3d(lon, lat, topo)
