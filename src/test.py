@@ -90,7 +90,6 @@ def run():
     missionlist = []
     for cmd in cmds:
         missionlist.append(cmd)
-
     _scannable = (vehicle.mode == 'AUTO' or vehicle.mode ==
                 'LOITER' or vehicle.mode == 'MANUAL') and cmds.next <= len(missionlist)
 
