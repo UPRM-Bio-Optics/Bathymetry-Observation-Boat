@@ -14,7 +14,6 @@ from datetime import date
 from time import sleep
 
 
-
 class Drone:
     def __init__(self):
         # do whatever on startup, could be setting up files, directories, maybe the data structures to use.
@@ -26,7 +25,7 @@ class Drone:
         are_empty = self.dataDict['lat'].size == 0 or self.dataDict['lon'].size == 0 or self.dataDict['topo'].size == 0
 
         self.csvfile = open(os.getcwd() + f'/src/Data/depth_data - ' +
-                       self.today.strftime("%b-%d-%Y") + '.csv')
+                            self.today.strftime("%b-%d-%Y") + '.csv')
         self.writer = csv.writer(self.csvfile)
         _header = ['Latitude', 'Longitude', 'Depth in Meters']
         self.writer.writerow(_header)
@@ -39,8 +38,7 @@ class Drone:
         for cmd in self.cmds:
             self.missionlist.append(cmd)
 
-
-#############################################################################################################################################
+    #############################################################################################################################################
     async def graph2d(self, lon, lat, topo):
 
         resolution = 0.008333333333333333
@@ -65,7 +63,8 @@ class Drone:
 
         plt.savefig(os.getcwd() + '/src/Graphs/TwoD map.png')
         # plt.show()
-############################################################################################################################################################################
+
+    ############################################################################################################################################################################
     async def graph3d(self, lon, lat, topo):
 
         resolution = 0.008333333333333333
@@ -118,7 +117,7 @@ class Drone:
 
                 if all(row):
                     self.writer.writerow(row)
-                    sleep(1)
+                    await asyncio.sleep(1)
 
         self.csvfile.close()
         await self.graph2d(self.dataDict['lon'], self.dataDict['lat'], self.dataDict['topo'])
@@ -126,18 +125,17 @@ class Drone:
 
 
 async def main():
-    loop = asyncio.get_event_loop() # this handles loop
+    loop = asyncio.get_event_loop()  # this handles loop
     drone = Drone()
     try:
-        asyncio.ensure_future(drone.run()) # We ensure the future for all the tasks we want.
-        loop.run_forever() # Loop runs forever
-    except KeyboardInterrupt: # We can interrupt the program with CTRL^C etc
+        asyncio.ensure_future(drone.run())  # We ensure the future for all the tasks we want.
+        loop.run_forever()  # Loop runs forever
+    except KeyboardInterrupt:  # We can interrupt the program with CTRL^C etc
         pass
-    finally: # Close the loop.
+    finally:  # Close the loop.
         print("Goodbye.")
         loop.close()
 
+
 if __name__ == '__main__':
     asyncio.run(main())
-
-
