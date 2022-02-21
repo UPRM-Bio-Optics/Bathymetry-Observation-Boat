@@ -20,13 +20,10 @@ class Drone:
         # do whatever on startup, could be setting up files, directories, maybe the data structures to use.
         self._vehicle_port = '/dev/USB0'  # dummy port; i forgor the port name
         self._echoounder_port = '/dev/ttyS0'  # same here lol
-
-        self.lat = np.array([])
-        self.lon = np.array([])
-        self.topo = np.array([])
+        self.dataDict = {'lat': np.array([]), 'lon': np.array([]), 'topo': np.array([])}
         self.today = date.today()
         # create txt file for error logs...
-        are_empty = self.lat.size == 0 or self.lon.size == 0 or self.topo.size == 0
+        are_empty = self.dataDict['lat'].size == 0 or self.dataDict['lon'].size == 0 or self.dataDict['topo'].size == 0
 
         self.csvfile = open(os.getcwd() + f'/src/Data/depth_data - ' +
                        self.today.strftime("%b-%d-%Y") + '.csv')
@@ -109,12 +106,12 @@ class Drone:
                     continue
 
                 if nmea_object.sentence_type == 'DPT':
-                    np.append(self.topo, nmea_object.depth)
+                    np.append(self.dataDict['topo'], nmea_object.depth)
                     row[2] = nmea_object.depth
 
                 elif nmea_object.sentence_type == 'GGA':
-                    np.append(self.lat, nmea_object.latitude)
-                    np.append(self.lon, nmea_object.longitude)
+                    np.append(self.dataDict['lat'], nmea_object.latitude)
+                    np.append(self.dataDict['lon'], nmea_object.longitude)
 
                     row[0] = nmea_object.latitude
                     row[1] = nmea_object.longitude
@@ -124,8 +121,8 @@ class Drone:
                     sleep(1)
 
         self.csvfile.close()
-        await self.graph2d(self.lon, self.lat, self.topo)
-        await self.graph3d(self.lon, self.lat, self.topo)
+        await self.graph2d(self.dataDict['lon'], self.dataDict['lat'], self.dataDict['topo'])
+        await self.graph3d(self.dataDict['lon'], self.dataDict['lat'], self.dataDict['topo'])
 
 
 async def main():
