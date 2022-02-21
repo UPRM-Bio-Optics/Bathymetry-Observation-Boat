@@ -1,5 +1,4 @@
 from configparser import ParsingError
-import numpy
 import serial
 import pynmea2
 import os
@@ -91,7 +90,7 @@ def run():
     for cmd in cmds:
         missionlist.append(cmd)
     _scannable = (vehicle.mode == 'AUTO' or vehicle.mode ==
-                'LOITER' or vehicle.mode == 'MANUAL') and cmds.next <= len(missionlist)
+                  'LOITER' or vehicle.mode == 'MANUAL') and cmds.next <= len(missionlist)
 
     with serial.Serial(_echoounder_port, baudrate=4800, timeout=2) as ser:
         while _scannable:

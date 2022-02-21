@@ -1,9 +1,8 @@
-
 import sys
 import glob
+from configparser import ParsingError
 import serial
 import pynmea2
-
 
 
 def serial_ports():
@@ -35,20 +34,23 @@ def serial_ports():
     return result
 
 
-
 if __name__ == '__main__':
-    with serial.Serial('/dev/ttyS0', baudrate = 4800, timeout = 1 ) as ser:
-        for i in range (15):
-            
+    with serial.Serial('/dev/ttyS0', baudrate=4800, timeout=1) as ser:
+        for i in range(15):
+
             line = ser.readline().decode('ascii', 'ignore')
-            if line.startswith('$'):
+            try:
                 obj = pynmea2.parse(line)
-            
-            if(obj.sentence_type == 'DPT'):
+            except ParsingError:
+                print(f'Could Not Parse Data: {line} ')
+                print(line.startswith('$'))
+                continue
+
+            if obj.sentence_type == 'DPT':
                 print(f'Some depth data for you, NMEA GOD: DEPTH = {obj.depth} meters')
-            elif(obj.sentence_type == 'GGA'):
+            elif obj.sentence_type == 'GGA':
                 print(f'Some coordinates for you, NMEA GOD: LAT = {obj.latitude}, LON = {obj.longitude} ')
             else:
                 print(f'Some other NMEA sentence of type: {obj.sentence_type} ')
-        
+
         print('DONE!!!!')
