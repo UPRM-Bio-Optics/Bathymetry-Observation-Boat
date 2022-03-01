@@ -23,7 +23,7 @@ if __name__ == '__main__':
         try:
             message = sock()
         except Exception as e:
-            print(f'Exception Occurred: {e.message}')
+            print(f'Exception Occurred: {e}')
             print('Retrying Connection...')
             continue
 
