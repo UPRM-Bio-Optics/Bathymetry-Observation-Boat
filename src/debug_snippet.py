@@ -7,7 +7,7 @@ import pynmea2
 
 def serial_ports():
     """ Lists serial port names
-        
+
         :raises EnvironmentError:
             On unsupported or unknown platforms
         :returns:
@@ -34,8 +34,11 @@ def serial_ports():
     return result
 
 
-if __name__ == '__main__':
-    with serial.Serial('/dev/ttyS0', baudrate=4800, timeout=1) as ser:
+def main() -> None:
+    
+    ports = serial_ports()
+    
+    with serial.Serial('/dev/USB0', baudrate=4800, timeout=1) as ser:
         for i in range(15):
 
             line = ser.readline().decode('ascii', 'ignore')
@@ -47,10 +50,16 @@ if __name__ == '__main__':
                 continue
 
             if obj.sentence_type == 'DPT':
-                print(f'Some depth data for you, NMEA GOD: DEPTH = {obj.depth} meters')
+                print(
+                    f'Some depth data for you, NMEA GOD: DEPTH = {obj.depth} meters')
             elif obj.sentence_type == 'GGA':
-                print(f'Some coordinates for you, NMEA GOD: LAT = {obj.latitude}, LON = {obj.longitude} ')
+                print(
+                    f'Some coordinates for you, NMEA GOD: LAT = {obj.latitude}, LON = {obj.longitude} ')
             else:
                 print(f'Some other NMEA sentence of type: {obj.sentence_type} ')
 
-        print('DONE!!!!')
+    print('DONE!!!!')
+
+
+if __name__ == '__main__':
+    main()

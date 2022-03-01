@@ -18,6 +18,8 @@ def main():
                         'datetime'])
     subprocess.check_call([sys.executable, '-m', 'pip', 'install',
                         'numpy'])
+    subprocess.check_call([sys.executable, '-m', 'pip', 'install',
+                        'requests'])
 
 
 if __name__ == '__main__':

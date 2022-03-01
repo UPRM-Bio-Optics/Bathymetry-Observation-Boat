@@ -4,7 +4,7 @@ import json
 import time
 import socket
 
-if __name__ == '__main__':
+def main():
     ngrok = subprocess.Popen("ngrok tcp 22",
                              stdout=subprocess.PIPE)
     time.sleep(3) # to allow the ngrok to fetch the url from the server
@@ -21,3 +21,7 @@ if __name__ == '__main__':
     print(s.recv(1024).decode())
     s.sendall(tunnel_url.encode())
     s.close()
+    
+    
+if __name__ == '__main__':
+    main()
