@@ -67,17 +67,15 @@ def graph3d(lon, lat, topo):
 def run():
 
     _vehicle_port = '/dev/USB0'  # dummy port; i forgor the port name
-    _echoounder_port = '/dev/ttyS0'  # same here lol
+    _echosounder_port = '/dev/ttyS0'  # same here lol
 
     lat = np.array([])
     lon = np.array([])
     topo = np.array([])
-    today = date.today()
-
-    are_empty = lat.size == 0 or lon.size == 0 or topo.size == 0
+    today = date.today().strftime("%b-%d-%Y")
 
     csvfile = open(os.getcwd() + f'/src/Data/depth_data - ' +
-                   today.strftime("%b-%d-%Y") + '.csv')
+                   today + '.csv')
     writer = csv.writer(csvfile)
     _header = ['Latitude', 'Longitude', 'Depth in Meters']
     writer.writerow(_header)
@@ -87,12 +85,13 @@ def run():
     cmds.download()
     cmds.wait_ready()
     missionlist = []
+    
     for cmd in cmds:
         missionlist.append(cmd)
     _scannable = (vehicle.mode == 'AUTO' or vehicle.mode ==
                   'LOITER' or vehicle.mode == 'MANUAL') and cmds.next <= len(missionlist)
 
-    with serial.Serial(_echoounder_port, baudrate=4800, timeout=2) as ser:
+    with serial.Serial(_echosounder_port, baudrate=4800, timeout=2) as ser:
         while _scannable:
             try:
                 line = ser.readline().decode('ascii', 'ignore')

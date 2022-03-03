@@ -5,8 +5,10 @@ import time
 import socket
 
 def main():
-    ngrok = subprocess.Popen("ngrok tcp 22",
-                             stdout=subprocess.PIPE)
+    subprocess.Popen("ngrok tcp 22",
+                    stdout=subprocess.PIPE)
+
+    
     time.sleep(3) # to allow the ngrok to fetch the url from the server
     localhost_url = "http://localhost:4040/api/tunnels" #Url with tunnel details
     tunnel_url = requests.get(localhost_url).text #Get the tunnel information
