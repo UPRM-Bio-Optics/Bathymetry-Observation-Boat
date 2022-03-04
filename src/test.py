@@ -1,4 +1,4 @@
-from configparser import ParsingError
+
 import serial
 import pynmea2
 import os
@@ -10,7 +10,12 @@ from matplotlib import cm
 from dronekit import connect
 from datetime import date
 from time import sleep
-
+'''
+TODO
+- change graphs dir
+- test usb connections 
+- 
+'''
 
 def graph2d(lon, lat, topo):
 
@@ -67,15 +72,14 @@ def graph3d(lon, lat, topo):
 def run():
 
     _vehicle_port = '/dev/USB0'  # dummy port; i forgor the port name
-    _echosounder_port = '/dev/ttyS0'  # same here lol
+    _echosounder_port = '/dev/USB1'  # same here lol
 
     lat = np.array([])
     lon = np.array([])
     topo = np.array([])
     today = date.today().strftime("%b-%d-%Y")
 
-    csvfile = open(os.getcwd() + f'/src/Data/depth_data - ' +
-                   today + '.csv', 'w')
+    csvfile = open('Data/depth_data/' + today.strftime("%b-%d-%Y") + '.csv', 'w')
     writer = csv.writer(csvfile)
     _header = ['Latitude', 'Longitude', 'Depth in Meters']
     writer.writerow(_header)
@@ -97,7 +101,7 @@ def run():
                 line = ser.readline().decode('ascii', 'ignore')
                 nmea_object = pynmea2.parse(line)
                 row = [None, None, None]
-            except ParsingError:
+            except Exception:
                 continue
 
             if nmea_object.sentence_type == 'DPT':
@@ -113,7 +117,7 @@ def run():
 
             if all(row):
                 writer.writerow(row)
-                sleep(1)
+                sleep(3)
                 
     csvfile.close()
     graph2d(lon, lat, topo)
