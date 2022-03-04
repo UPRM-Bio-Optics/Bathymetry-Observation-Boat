@@ -75,7 +75,7 @@ def run():
     today = date.today().strftime("%b-%d-%Y")
 
     csvfile = open(os.getcwd() + f'/src/Data/depth_data - ' +
-                   today + '.csv')
+                   today + '.csv', 'w')
     writer = csv.writer(csvfile)
     _header = ['Latitude', 'Longitude', 'Depth in Meters']
     writer.writerow(_header)
