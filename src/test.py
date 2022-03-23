@@ -1,7 +1,6 @@
 
 import serial
 import pynmea2
-import os
 import csv
 import numpy as np
 import scipy.interpolate
@@ -10,14 +9,15 @@ from matplotlib import cm
 from dronekit import connect
 from datetime import date
 from time import sleep
+import os
 '''
 TODO
-- change graphs dir
-- test usb connections 
-- 
+- make scannable variable into function -> boolean
 '''
+# https://hacks.mozilla.org/2017/02/headless-raspberry-pi-configuration-over-bluetooth/
 
-def graph2d(lon, lat, topo):
+
+def graph2d(lon, lat, topo) -> None:
 
     resolution = 0.008333333333333333
     # Determine the number of grid points in the x and y directions
@@ -39,11 +39,12 @@ def graph2d(lon, lat, topo):
     plt.colorbar()
     # save Image and show it
 
-    plt.savefig(os.getcwd() + '/src/Graphs/TwoD map.png')
+    today = date.today().strftime("%b-%d-%Y")
+    plt.savefig(os.getcwd() + '/src/Graphs/' + today + 'TwoD map.png')
     # plt.show()
 
 
-def graph3d(lon, lat, topo):
+def graph3d(lon, lat, topo) -> None:
 
     resolution = 0.008333333333333333
     # Determine the number of grid points in the x and y directions
@@ -65,64 +66,95 @@ def graph3d(lon, lat, topo):
     plt.suptitle('Topograhy Surface Render', fontsize=18)
     fig.colorbar(surf, shrink=0.5, aspect=5)
 
-    plt.savefig(os.getcwd() + '/src/Graphs/ThreeD map.png')
+    today = date.today().strftime("%b-%d-%Y")
+    plt.savefig(os.getcwd() + '/src/Graphs/' + today + 'ThreeD map.png')
     # plt.show()
 
 
+def isScannable(vehicle, cmds, missionlist) -> bool:
+    return vehicle.armed or cmds.next <= len(missionlist)
+
+
 def run():
+    #ports for pixhawk and port for echosounder
+    _vehicle_port = '/dev/ttyACM0'
+    _echosounder_port = '/dev/ttyUSB0'
 
-    _vehicle_port = '/dev/USB0'  # dummy port; i forgor the port name
-    _echosounder_port = '/dev/USB1'  # same here lol
-
+    #
     lat = np.array([])
     lon = np.array([])
     topo = np.array([])
     today = date.today().strftime("%b-%d-%Y")
 
-    csvfile = open('Data/depth_data/' + today.strftime("%b-%d-%Y") + '.csv', 'w')
+    csvfile = open(os.getcwd() + '/Data/depth_data/' + today + '.csv', 'w')
     writer = csv.writer(csvfile)
-    _header = ['Latitude', 'Longitude', 'Depth in Meters']
+    _header = ['Latitude', 'Longitude', 'Depth in Feet']
     writer.writerow(_header)
 
-    vehicle = connect(_vehicle_port, baud=115200, heartbeat_timeout=5)
-    cmds = vehicle.commands
-    cmds.download()
-    cmds.wait_ready()
-    missionlist = []
-    
+    while True:
+        try:
+            vehicle = connect(_vehicle_port, baud=115200, heartbeat_timeout=5)
+            cmds = vehicle.commands
+            cmds.download()
+            cmds.wait_ready()
+            missionlist = []
+            break
+
+        except Exception as e:
+            print('Could not connect to Pixhawk')
+            print(e)
+            continue
+
     for cmd in cmds:
         missionlist.append(cmd)
-    _scannable = (vehicle.mode == 'AUTO' or vehicle.mode ==
-                  'LOITER' or vehicle.mode == 'MANUAL') and cmds.next <= len(missionlist)
 
-    with serial.Serial(_echosounder_port, baudrate=4800, timeout=2) as ser:
-        while _scannable:
-            try:
+    print("about to enter loop")
+    ser = serial.Serial(_echosounder_port, baudrate=4800, timeout=2)
+    row = [None, None, None]
+    while isScannable(vehicle, cmds, missionlist):
+          
+        try:
                 line = ser.readline().decode('ascii', 'ignore')
                 nmea_object = pynmea2.parse(line)
-                row = [None, None, None]
-            except Exception:
+
+        except Exception:
                 continue
 
-            if nmea_object.sentence_type == 'DPT':
-                np.append(topo, nmea_object.depth)
-                row[2] = nmea_object.depth
-                
-            elif nmea_object.sentence_type == 'GGA':
-                np.append(lat, nmea_object.latitude)
-                np.append(lon, nmea_object.longitude)
-                
-                row[0] = nmea_object.latitude
-                row[1] = nmea_object.longitude
+        if nmea_object.sentence_type == 'DBT':
+                print(f'Appending Depth Data {nmea_object.depth_feet}')
+                np.append(topo, nmea_object.depth_feet)
+                row[2] = nmea_object.depth_feet
 
-            if all(row):
-                writer.writerow(row)
-                sleep(3)
-                
+        elif nmea_object.sentence_type == 'GGA':
+            print(f'Appending GPS Data:  {nmea_object.latitude} {nmea_object.longitude}')
+            np.append(lat, nmea_object.latitude)
+            np.append(lon, nmea_object.longitude)
+            row[0] = nmea_object.latitude
+            row[1] = nmea_object.longitude
+
+        print(row)
+
+        if all(row):
+            print('ADDING ROW CSV')
+            writer.writerow(row)
+            csvfile.flush()
+            row = [None, None, None]
+            sleep(0.1)
+
+    print('Done with Mission ')
+
+    try:
+
+        graph2d(lon, lat, topo)
+        graph3d(lon, lat, topo)
+    except Exception as e:
+
+        print(' AT least you tried graphs :|')
+        row = ['could not graph', 'error', e]
+        writer.writerow(row)
+
     csvfile.close()
-    graph2d(lon, lat, topo)
-    graph3d(lon, lat, topo)
-
+    ser.close()
 
 if __name__ == '__main__':
     run()
