@@ -10,6 +10,7 @@ from dronekit import connect
 from datetime import date
 from time import sleep
 import os
+import random
 '''
 TODO
 - make scannable variable into function -> boolean
@@ -29,10 +30,10 @@ def graph2d(lon, lat, topo) -> None:
 
     # Interpolate topo into a grid (x by y dimesions)
     grid_z = scipy.interpolate.griddata(
-        (lon, lat), topo, (grid_x, grid_y), method='cubic')
+        (lon, lat), topo, (grid_x, grid_y), method='linear')
 
     # plot
-    cs = plt.contourf(grid_x, grid_y, grid_z, cmap=cm.coolwarm)
+    plt.contourf(grid_x, grid_y, grid_z, cmap=cm.coolwarm)
     plt.xlabel("Longitude", fontsize=15)
     plt.ylabel("Latitude", fontsize=15)
     plt.suptitle("Bathymetry Example", fontsize=18)
@@ -40,7 +41,7 @@ def graph2d(lon, lat, topo) -> None:
     # save Image and show it
 
     today = date.today().strftime("%b-%d-%Y")
-    plt.savefig(os.getcwd() + '/src/Graphs/' + today + 'TwoD map.png')
+    plt.savefig(os.getcwd() + '/Data/Graphs/' + today + 'TwoD map.png')
     # plt.show()
 
 
@@ -56,7 +57,7 @@ def graph3d(lon, lat, topo) -> None:
 
     # Interpolate topo into a grid (x by y dimesions)
     grid_z = scipy.interpolate.griddata(
-        (lon, lat), topo, (grid_x, grid_y), method='cubic')
+        (lon, lat), topo, (grid_x, grid_y), method='linear')
 
     fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
     surf = ax.plot_surface(grid_x, grid_y, grid_z, cmap=cm.coolwarm)
@@ -67,7 +68,7 @@ def graph3d(lon, lat, topo) -> None:
     fig.colorbar(surf, shrink=0.5, aspect=5)
 
     today = date.today().strftime("%b-%d-%Y")
-    plt.savefig(os.getcwd() + '/src/Graphs/' + today + 'ThreeD map.png')
+    plt.savefig(os.getcwd() + '/Data/Graphs/' + today + 'ThreeD map.png')
     # plt.show()
 
 
@@ -80,7 +81,6 @@ def run():
     _vehicle_port = '/dev/ttyACM0'
     _echosounder_port = '/dev/ttyUSB0'
 
-    #
     lat = np.array([])
     lon = np.array([])
     topo = np.array([])
@@ -111,35 +111,43 @@ def run():
     print("about to enter loop")
     ser = serial.Serial(_echosounder_port, baudrate=4800, timeout=2)
     row = [None, None, None]
-    while isScannable(vehicle, cmds, missionlist):
+    scannable = vehicle.armed
+    #for i in range(50): #stop deleting this
+    while scannable:
           
         try:
-                line = ser.readline().decode('ascii', 'ignore')
-                nmea_object = pynmea2.parse(line)
+            line = ser.readline().decode('ascii', 'ignore')
+            nmea_object = pynmea2.parse(line)
 
         except Exception:
-                continue
+            continue
 
         if nmea_object.sentence_type == 'DBT':
+            
                 print(f'Appending Depth Data {nmea_object.depth_feet}')
-                np.append(topo, nmea_object.depth_feet)
+                topo = np.append(topo, float(nmea_object.depth_feet))
                 row[2] = nmea_object.depth_feet
+                
+                
 
         elif nmea_object.sentence_type == 'GGA':
+            
             print(f'Appending GPS Data:  {nmea_object.latitude} {nmea_object.longitude}')
-            np.append(lat, nmea_object.latitude)
-            np.append(lon, nmea_object.longitude)
+            lat = np.append(lat, nmea_object.latitude)
+            lon = np.append(lon, nmea_object.longitude)
             row[0] = nmea_object.latitude
             row[1] = nmea_object.longitude
-
+            
         print(row)
 
         if all(row):
+            
             print('ADDING ROW CSV')
             writer.writerow(row)
             csvfile.flush()
             row = [None, None, None]
             sleep(0.1)
+        scannable = vehicle.armed
 
     print('Done with Mission ')
 
