@@ -38,8 +38,8 @@ def graph2d(lon, lat, topo) -> None:
     plt.ylabel("Latitude", fontsize=15)
     plt.suptitle("Bathymetry Example", fontsize=18)
     plt.colorbar()
+    
     # save Image and show it
-
     today = date.today().strftime("%b-%d-%Y")
     plt.savefig(os.getcwd() + '/Data/Graphs/' + today + 'TwoD map.png')
     # plt.show()
