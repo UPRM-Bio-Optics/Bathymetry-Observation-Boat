@@ -12,7 +12,6 @@ from dronekit import connect
 from datetime import date
 from time import sleep
 
-
 class Drone:
     def __init__(self):
         # do whatever on startup, could be setting up files, directories, maybe the data structures to use.

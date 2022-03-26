@@ -1,8 +1,9 @@
 import sys
 import subprocess
 
+# This script installs the necesarry libraries for the program to run
 
-# implement pip as a subprocess:
+# Implement pip as a subprocess:
 def main():
     subprocess.check_call([sys.executable, '-m', 'pip', 'install',
                         'dronekit'])
