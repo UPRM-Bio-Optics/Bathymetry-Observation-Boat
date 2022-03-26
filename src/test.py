@@ -17,7 +17,7 @@ TODO
 '''
 # https://hacks.mozilla.org/2017/02/headless-raspberry-pi-configuration-over-bluetooth/
 
-
+# 2D graphing function
 def graph2d(lon, lat, topo) -> None:
 
     resolution = 0.008333333333333333
@@ -32,19 +32,19 @@ def graph2d(lon, lat, topo) -> None:
     grid_z = scipy.interpolate.griddata(
         (lon, lat), topo, (grid_x, grid_y), method='linear')
 
-    # plot
+    # Plot
     plt.contourf(grid_x, grid_y, grid_z, cmap=cm.coolwarm)
     plt.xlabel("Longitude", fontsize=15)
     plt.ylabel("Latitude", fontsize=15)
     plt.suptitle("Bathymetry Example", fontsize=18)
     plt.colorbar()
     
-    # save Image and show it
+    # Save image and show it
     today = date.today().strftime("%b-%d-%Y")
     plt.savefig(os.getcwd() + '/Data/Graphs/' + today + 'TwoD map.png')
-    # plt.show()
+    ##plt.show()
 
-
+# 3D graphing function
 def graph3d(lon, lat, topo) -> None:
 
     resolution = 0.008333333333333333
@@ -69,34 +69,39 @@ def graph3d(lon, lat, topo) -> None:
 
     today = date.today().strftime("%b-%d-%Y")
     plt.savefig(os.getcwd() + '/Data/Graphs/' + today + 'ThreeD map.png')
-    # plt.show()
+    ##plt.show()
 
-
+# Function to determines if vehicle is armed or not done with missions
 def isScannable(vehicle, cmds, missionlist) -> bool:
     return vehicle.armed or cmds.next <= len(missionlist)
 
-
+# Run
 def run():
-    #ports for pixhawk and port for echosounder
+    # Initialize ports for pixhawk and echosounder
     _vehicle_port = '/dev/ttyACM0'
     _echosounder_port = '/dev/ttyUSB0'
 
+    # Initialize data lists
     lat = np.array([])
     lon = np.array([])
     topo = np.array([])
     today = date.today().strftime("%b-%d-%Y")
-
+    
+    # Create and initialize csv file
     csvfile = open(os.getcwd() + '/Data/depth_data/' + today + '.csv', 'w')
     writer = csv.writer(csvfile)
     _header = ['Latitude', 'Longitude', 'Depth in Feet']
     writer.writerow(_header)
 
+    # Pixhawk connection loop
     while True:
         try:
             vehicle = connect(_vehicle_port, baud=115200, heartbeat_timeout=5)
+            # Download comands
             cmds = vehicle.commands
             cmds.download()
             cmds.wait_ready()
+            # Initialize list of missions
             missionlist = []
             break
 
@@ -105,23 +110,29 @@ def run():
             print(e)
             continue
 
+    # Add all commands to the list of missions
     for cmd in cmds:
         missionlist.append(cmd)
 
+    # Sensor connection
     print("about to enter loop")
     ser = serial.Serial(_echosounder_port, baudrate=4800, timeout=2)
     row = [None, None, None]
     scannable = vehicle.armed
-    #for i in range(50): #stop deleting this
+
+    ##for i in range(50): #stop deleting this
+
     while scannable:
-          
+        
+        # Translate NMEA data to sentences
         try:
             line = ser.readline().decode('ascii', 'ignore')
             nmea_object = pynmea2.parse(line)
 
         except Exception:
             continue
-
+        
+        # Detect and record depth data sentences
         if nmea_object.sentence_type == 'DBT':
             
                 print(f'Appending Depth Data {nmea_object.depth_feet}')
@@ -129,7 +140,7 @@ def run():
                 row[2] = nmea_object.depth_feet
                 
                 
-
+        # Detect and record location data sentences
         elif nmea_object.sentence_type == 'GGA':
             
             print(f'Appending GPS Data:  {nmea_object.latitude} {nmea_object.longitude}')
@@ -140,17 +151,18 @@ def run():
             
         print(row)
 
+        # Write data to CSV file
         if all(row):
-            
             print('ADDING ROW CSV')
             writer.writerow(row)
-            csvfile.flush()
+            csvfile.flush()    # Save current data to CSV
             row = [None, None, None]
             sleep(0.1)
         scannable = vehicle.armed
 
     print('Done with Mission ')
 
+    # Graph CSV data
     try:
 
         graph2d(lon, lat, topo)
@@ -161,8 +173,10 @@ def run():
         row = ['could not graph', 'error', e]
         writer.writerow(row)
 
+    # Close CSV file
     csvfile.close()
     ser.close()
 
+# Main function
 if __name__ == '__main__':
     run()
