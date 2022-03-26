@@ -107,32 +107,22 @@ def graphTest():
         lon = np.append(lon, round(float(row[1]), 5))
         topo = np.append(topo, round(float(row[2]), 5))
 
-    fig, ax1 = plt.subplots()     
-    
+    fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
     fig.set_figheight(10)
     fig.set_figwidth(15)
     xi = np.linspace(min(lat), max(lat), len(lat))
     yi = np.linspace(min(lon), max(lon), len(lon))
     zi = griddata((lat ,lon), topo, (xi[None,:], yi[:,None]), method='linear')
     
-    
-    cntr1 = ax1.contourf(xi, yi, zi, levels=20, cmap= cm.coolwarm)
-    cbar = fig.colorbar(cntr1, ax=ax1)
-    cbar.set_label('Depth in Feet', fontsize = 20)
-    ax1.plot(lat, lon, 'ro', ms=3)
-    ax1.set(xlim=(min(lat), max(lat)), ylim=(min(lon), max(lon)))
-    
-    m = basemap.Basemap(llcrnrlat= min(lat), llcrnrlon= min(lon), 
-                        urcrnrlat= max(lat), urcrnrlon=max(lon), 
-                        width= max(lat) - min(lat), 
-                        height= max(lon) - min(lon),
-                        projection='merc',
-                        resolution='c')
-    
-    ax1.set_title('Bathymetry Map in Parguera', fontsize = 20)
-    ax1.set_xlabel('Latitude', fontsize = 20)
-    ax1.set_ylabel('Longitude', fontsize = 20)
-    plt.savefig("test.png", dpi= 300)
+    surf = ax.plot_surface(xi, yi, zi, cmap=cm.coolwarm)
+
+    plt.xlabel("Latitude")
+    plt.ylabel("Longitude")
+    plt.suptitle('Topograhy Surface Render', fontsize=18)
+    fig.colorbar(surf, shrink=0.5, aspect=5)
+
+    today = date.today().strftime("%b-%d-%Y")
+    plt.savefig("test3d.png")
     plt.show()
     
     

@@ -3,14 +3,15 @@ import serial
 import pynmea2
 import csv
 import numpy as np
-import scipy.interpolate
+from scipy.interpolate import griddata
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from dronekit import connect
 from datetime import date
 from time import sleep
 import os
-import random
+import basemap
+
 '''
 TODO
 - make scannable variable into function -> boolean
@@ -20,47 +21,47 @@ TODO
 # 2D graphing function
 def graph2d(lon, lat, topo) -> None:
 
-    resolution = 0.008333333333333333
-    # Determine the number of grid points in the x and y directions
-    nx = complex(0, (max(lon) - min(lon)) / resolution)
-    ny = complex(0, (max(lat) - min(lat)) / resolution)
-
-    # Build 2 grids: One with lats and the other with lons
-    grid_x, grid_y = np.mgrid[min(lon):max(lon):nx, min(lat):max(lat):ny]
-
-    # Interpolate topo into a grid (x by y dimesions)
-    grid_z = scipy.interpolate.griddata(
-        (lon, lat), topo, (grid_x, grid_y), method='linear')
-
-    # Plot
-    plt.contourf(grid_x, grid_y, grid_z, cmap=cm.coolwarm)
-    plt.xlabel("Longitude", fontsize=15)
-    plt.ylabel("Latitude", fontsize=15)
-    plt.suptitle("Bathymetry Example", fontsize=18)
-    plt.colorbar()
+    fig, ax1 = plt.subplots()     
     
-    # Save image and show it
+    fig.set_figheight(10)
+    fig.set_figwidth(15)
+    xi = np.linspace(min(lat), max(lat), len(lat))
+    yi = np.linspace(min(lon), max(lon), len(lon))
+    zi = griddata((lat ,lon), topo, (xi[None,:], yi[:,None]), method='linear')
+    
+    
+    cntr1 = ax1.contourf(xi, yi, zi, levels=20, cmap= cm.coolwarm)
+    cbar = fig.colorbar(cntr1, ax=ax1)
+    cbar.set_label('Depth in Feet', fontsize = 20)
+    ax1.plot(lat, lon, 'ro', ms=3)
+    ax1.set(xlim=(min(lat), max(lat)), ylim=(min(lon), max(lon)))
+    
+    m = basemap.Basemap(llcrnrlat= min(lat), llcrnrlon= min(lon), 
+                        urcrnrlat= max(lat), urcrnrlon=max(lon), 
+                        width= max(lat) - min(lat), 
+                        height= max(lon) - min(lon),
+                        projection='merc',
+                        resolution='c')
+    
+    ax1.set_title('Bathymetry Map in Parguera', fontsize = 20)
+    ax1.set_xlabel('Latitude', fontsize = 20)
+    ax1.set_ylabel('Longitude', fontsize = 20)
+    
     today = date.today().strftime("%b-%d-%Y")
     plt.savefig(os.getcwd() + '/Data/Graphs/' + today + 'TwoD map.png')
-    ##plt.show()
 
 # 3D graphing function
 def graph3d(lon, lat, topo) -> None:
 
-    resolution = 0.008333333333333333
-    # Determine the number of grid points in the x and y directions
-    nx = complex(0, (max(lon) - min(lon)) / resolution)
-    ny = complex(0, (max(lat) - min(lat)) / resolution)
-
-    # Build 2 grids: One with lats and the other with lons
-    grid_x, grid_y = np.mgrid[min(lon):max(lon):nx, min(lat):max(lat):ny]
-
-    # Interpolate topo into a grid (x by y dimesions)
-    grid_z = scipy.interpolate.griddata(
-        (lon, lat), topo, (grid_x, grid_y), method='linear')
 
     fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
-    surf = ax.plot_surface(grid_x, grid_y, grid_z, cmap=cm.coolwarm)
+    fig.set_figheight(10)
+    fig.set_figwidth(15)
+    xi = np.linspace(min(lat), max(lat), len(lat))
+    yi = np.linspace(min(lon), max(lon), len(lon))
+    zi = griddata((lat ,lon), topo, (xi[None,:], yi[:,None]), method='linear')
+    
+    surf = ax.plot_surface(xi, yi, zi, cmap=cm.coolwarm)
 
     plt.xlabel("Longitude")
     plt.ylabel("Latitude")
