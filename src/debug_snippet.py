@@ -8,8 +8,6 @@ import csv
 import os
 from datetime import date
 
-
-
 def serial_ports():
     """ Lists serial port names
         
@@ -37,7 +35,6 @@ def serial_ports():
         except (OSError, serial.SerialException):
             pass
     return result
-
 
 if __name__ == '__main__':
     lat = np.array([])
