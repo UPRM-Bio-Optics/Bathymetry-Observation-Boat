@@ -1,3 +1,3 @@
-# NCAS - M
+# NCAS-M UPRM
 
-UPRM students reasearch project
+University of Puerto Rico's Bio-Optical Oceanography Laboratory undergraduate resarch prohject.
