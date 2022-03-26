@@ -1,3 +1,5 @@
+from cProfile import label
+from msilib.schema import Font
 import sys
 import glob
 import serial
@@ -7,12 +9,13 @@ import time
 import csv
 import os
 from datetime import date
-
-
-
+import matplotlib.pyplot as plt
+from scipy.interpolate import griddata
+from matplotlib import cm
+from mpl_toolkits import basemap
 def serial_ports():
     """ Lists serial port names
-        
+
         :raises EnvironmentError:
             On unsupported or unknown platforms
         :returns:
@@ -39,16 +42,16 @@ def serial_ports():
     return result
 
 
-if __name__ == '__main__':
+def main():
     lat = np.array([])
     lon = np.array([])
     topo = np.array([])
     today = date.today()
     csvfilePath = 'Data/depth_data/' + today.strftime("%b-%d-%Y") + '.csv'
     csvfile = open(csvfilePath, 'w')
-        
-    #csvfile = open(os.getcwd() + f'/src/Data/depth_data/' +
-                   #today.strftime("%b-%d-%Y") + '.csv')
+
+    # csvfile = open(os.getcwd() + f'/src/Data/depth_data/' +
+    # today.strftime("%b-%d-%Y") + '.csv')
     writer = csv.writer(csvfile)
     _header = ['Latitude', 'Longitude', 'Depth in Meters']
     writer.writerow(_header)
@@ -60,28 +63,80 @@ if __name__ == '__main__':
             try:
                 obj = pynmea2.parse(line)
             except:
-                print('Could Not Parse Data: ', line) # print(f'was not working.)
+                # print(f'was not working.)
+                print('Could Not Parse Data: ', line)
                 print(line.startswith('$'))
                 continue
 
             if obj.sentence_type == 'DPT':
-                print('Some depth data for you, NMEA GOD: DEPTH = ', obj.depth) #print(f'Some depth data for you, NMEA GOD: DEPTH = {obj.depth} meters')
+                # print(f'Some depth data for you, NMEA GOD: DEPTH = {obj.depth} meters')
+                print('Some depth data for you, NMEA GOD: DEPTH = ', obj.depth)
                 row[2] = 1
             elif obj.sentence_type == 'GGA':
                 print('Some coordinates for you, NMEA GOD: LAT = ', obj.latitude)
                 np.append(lat, obj.latitude)
-                print('Some coordinates for you, NMEA GOD: LON = ', obj.longitude) #print(f'Some coordinates for you, NMEA GOD: LAT = {obj.latitude}, LON = {obj.longitude} ')
+                # print(f'Some coordinates for you, NMEA GOD: LAT = {obj.latitude}, LON = {obj.longitude} ')
+                print('Some coordinates for you, NMEA GOD: LON = ', obj.longitude)
                 np.append(lon, obj.lon)
                 row[0] = obj.latitude
                 row[1] = obj.longitude
             if all(row):
                 writer.writerow(row)
-                #time.sleep(1)
+                # time.sleep(1)
             else:
                 print('Some other NMEA sentence of type: ', obj.sentence_type)
-            
-            #time.sleep(5)
-        temp = [1,2,3] #temp data
+
+            # time.sleep(5)
+        temp = [1, 2, 3]  # temp data
         writer.writerow(temp)
         csvfile.close()
         print('DONE!!!!')
+
+
+def graphTest():
+
+    file = open("Mar-25-2022.csv")
+    csvReader = csv.reader(file)
+    header = next(csvReader)
+    lat = np.array([])
+    lon = np.array([])
+    topo = np.array([])
+    
+    for row in csvReader:
+        lat = np.append(lat, round(float(row[0]), 5))
+        lon = np.append(lon, round(float(row[1]), 5))
+        topo = np.append(topo, round(float(row[2]), 5))
+
+    fig, ax1 = plt.subplots()     
+    
+    fig.set_figheight(10)
+    fig.set_figwidth(15)
+    xi = np.linspace(min(lat), max(lat), len(lat))
+    yi = np.linspace(min(lon), max(lon), len(lon))
+    zi = griddata((lat ,lon), topo, (xi[None,:], yi[:,None]), method='linear')
+    
+    
+    cntr1 = ax1.contourf(xi, yi, zi, levels=20, cmap= cm.coolwarm)
+    cbar = fig.colorbar(cntr1, ax=ax1)
+    cbar.set_label('Depth in Feet', fontsize = 20)
+    ax1.plot(lat, lon, 'ro', ms=3)
+    ax1.set(xlim=(min(lat), max(lat)), ylim=(min(lon), max(lon)))
+    
+    m = basemap.Basemap(llcrnrlat= min(lat), llcrnrlon= min(lon), 
+                        urcrnrlat= max(lat), urcrnrlon=max(lon), 
+                        width= max(lat) - min(lat), 
+                        height= max(lon) - min(lon),
+                        projection='merc',
+                        resolution='c')
+    
+    ax1.set_title('Bathymetry Map in Parguera', fontsize = 20)
+    ax1.set_xlabel('Latitude', fontsize = 20)
+    ax1.set_ylabel('Longitude', fontsize = 20)
+    plt.savefig("test.png", dpi= 300)
+    plt.show()
+    
+    
+
+
+if __name__ == '__main__':
+    graphTest()
