@@ -12,7 +12,7 @@ from datetime import date
 import matplotlib.pyplot as plt
 from scipy.interpolate import griddata
 from matplotlib import cm
-from mpl_toolkits import basemap
+
 def serial_ports():
     """ Lists serial port names
 
@@ -98,34 +98,37 @@ def graphTest():
     file = open("Mar-25-2022.csv")
     csvReader = csv.reader(file)
     header = next(csvReader)
-    lat = np.array([])
-    lon = np.array([])
-    topo = np.array([])
-    
-    for row in csvReader:
-        lat = np.append(lat, round(float(row[0]), 5))
-        lon = np.append(lon, round(float(row[1]), 5))
-        topo = np.append(topo, round(float(row[2]), 5))
+    lat, lon, topo = np.loadtxt(file, delimiter=',', skiprows=2, unpack=True)
 
-    fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
+    topo = -topo
+    fig, ax1 = plt.subplots() 
+    
     fig.set_figheight(10)
     fig.set_figwidth(15)
-    xi = np.linspace(min(lat), max(lat), len(lat))
-    yi = np.linspace(min(lon), max(lon), len(lon))
-    zi = griddata((lat ,lon), topo, (xi[None,:], yi[:,None]), method='linear')
+    xi = np.linspace(min(lon), max(lon), len(lon))
+    yi = np.linspace(min(lat), max(lat), len(lat))
     
-    surf = ax.plot_surface(xi, yi, zi, cmap=cm.coolwarm)
-
-    plt.xlabel("Latitude")
-    plt.ylabel("Longitude")
-    plt.suptitle('Topograhy Surface Render', fontsize=18)
-    fig.colorbar(surf, shrink=0.5, aspect=5)
-
-    today = date.today().strftime("%b-%d-%Y")
+    zi = griddata((lon ,lat), topo, (xi[None,:], yi[:,None]), method='linear')
+    
+    """     m = basemap.Basemap(llcrnrlat= min(lat), llcrnrlon= min(lon), 
+                        urcrnrlat= max(lat), urcrnrlon=max(lon), 
+                        width= max(lat) - min(lat), 
+                        height= max(lon) - min(lon),
+                        projection='merc',
+                        resolution='c')
+    
+    m.drawCoastLine() """
+    cntr1 = ax1.contourf(xi, yi, zi, levels=30,cmap= cm.coolwarm)
+    cbar = fig.colorbar(cntr1, ax=ax1)
+    cbar.set_label('Depth in Feet', fontsize = 20)
+    #ax1.plot(lon, lat, 'bo', ms=1)
+    ax1.set(xlim=(min(lon) , max(lon)), ylim=(min(lat), max(lat)))
+    
+    ax1.set_title('Bathymetry Map in Parguera', fontsize = 20)
+    ax1.set_xlabel('Latitude', fontsize = 20)
+    ax1.set_ylabel('Longitude', fontsize = 20)
     plt.savefig("test3d.png")
     plt.show()
-    
-    
 
 
 if __name__ == '__main__':

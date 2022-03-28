@@ -25,27 +25,30 @@ def graph2d(lon, lat, topo) -> None:
     
     fig.set_figheight(10)
     fig.set_figwidth(15)
-    xi = np.linspace(min(lat), max(lat), len(lat))
-    yi = np.linspace(min(lon), max(lon), len(lon))
-    zi = griddata((lat ,lon), topo, (xi[None,:], yi[:,None]), method='linear')
+    xi = np.linspace(min(lon), max(lon), len(lon))
+    yi = np.linspace(min(lat), max(lat), len(lat))
     
+    zi = griddata((lon ,lat), topo, (xi[None,:], yi[:,None]), method='linear')
     
-    cntr1 = ax1.contourf(xi, yi, zi, levels=20, cmap= cm.coolwarm)
-    cbar = fig.colorbar(cntr1, ax=ax1)
-    cbar.set_label('Depth in Feet', fontsize = 20)
-    ax1.plot(lat, lon, 'ro', ms=3)
-    ax1.set(xlim=(min(lat), max(lat)), ylim=(min(lon), max(lon)))
-    
-    m = basemap.Basemap(llcrnrlat= min(lat), llcrnrlon= min(lon), 
+    """     m = basemap.Basemap(llcrnrlat= min(lat), llcrnrlon= min(lon), 
                         urcrnrlat= max(lat), urcrnrlon=max(lon), 
                         width= max(lat) - min(lat), 
                         height= max(lon) - min(lon),
                         projection='merc',
                         resolution='c')
     
+    m.drawCoastLine() """
+    cntr1 = ax1.contourf(xi, yi, zi, levels=30,cmap= cm.coolwarm)
+    cbar = fig.colorbar(cntr1, ax=ax1)
+    cbar.set_label('Depth in Feet', fontsize = 20)
+    #ax1.plot(lon, lat, 'bo', ms=1)
+    ax1.set(xlim=(min(lon) , max(lon)), ylim=(min(lat), max(lat)))
+    
     ax1.set_title('Bathymetry Map in Parguera', fontsize = 20)
     ax1.set_xlabel('Latitude', fontsize = 20)
     ax1.set_ylabel('Longitude', fontsize = 20)
+    plt.savefig("test3d.png")
+    plt.show()
     
     today = date.today().strftime("%b-%d-%Y")
     plt.savefig(os.getcwd() + '/Data/Graphs/' + today + 'TwoD map.png')
@@ -54,19 +57,33 @@ def graph2d(lon, lat, topo) -> None:
 def graph3d(lon, lat, topo) -> None:
 
 
-    fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
+    fig, ax1 = plt.subplots(subplot_kw={"projection": "3d"})    
     fig.set_figheight(10)
     fig.set_figwidth(15)
-    xi = np.linspace(min(lat), max(lat), len(lat))
-    yi = np.linspace(min(lon), max(lon), len(lon))
-    zi = griddata((lat ,lon), topo, (xi[None,:], yi[:,None]), method='linear')
+    xi = np.linspace(min(lon), max(lon), len(lon))
+    yi = np.linspace(min(lat), max(lat), len(lat))
     
-    surf = ax.plot_surface(xi, yi, zi, cmap=cm.coolwarm)
-
-    plt.xlabel("Longitude")
-    plt.ylabel("Latitude")
-    plt.suptitle('Topograhy Surface Render', fontsize=18)
-    fig.colorbar(surf, shrink=0.5, aspect=5)
+    zi = griddata((lon ,lat), topo, (xi[None,:], yi[:,None]), method='linear')
+    
+    """     m = basemap.Basemap(llcrnrlat= min(lat), llcrnrlon= min(lon), 
+                        urcrnrlat= max(lat), urcrnrlon=max(lon), 
+                        width= max(lat) - min(lat), 
+                        height= max(lon) - min(lon),
+                        projection='merc',
+                        resolution='c')
+    
+    m.drawCoastLine() """
+    cntr1 = ax1.contourf(xi, yi, zi, levels=30,cmap= cm.coolwarm)
+    cbar = fig.colorbar(cntr1, ax=ax1)
+    cbar.set_label('Depth in Feet', fontsize = 20)
+    #ax1.plot(lon, lat, 'bo', ms=1)
+    ax1.set(xlim=(min(lon) , max(lon)), ylim=(min(lat), max(lat)))
+    
+    ax1.set_title('Bathymetry Map in Parguera', fontsize = 20)
+    ax1.set_xlabel('Latitude', fontsize = 20)
+    ax1.set_ylabel('Longitude', fontsize = 20)
+    plt.savefig("test3d.png")
+    plt.show()
 
     today = date.today().strftime("%b-%d-%Y")
     plt.savefig(os.getcwd() + '/Data/Graphs/' + today + 'ThreeD map.png')

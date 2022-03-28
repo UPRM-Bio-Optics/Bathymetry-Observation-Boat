@@ -64,4 +64,3 @@ Latitude,Longitude,Depth in Feet
 18.0995,-67.19063333333334,4.36
 18.0995,-67.19061666666667,4.20
 18.0995,-67.1906,3.93
-pip3 install https://github.com/matplotlib/basemap/archive/master.zip
