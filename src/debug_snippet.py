@@ -101,7 +101,7 @@ def graphTest():
     lat, lon, topo = np.loadtxt(file, delimiter=',', skiprows=2, unpack=True)
 
     topo = -topo
-    fig, ax1 = plt.subplots() 
+    fig, ax1 = plt.subplots(subplot_kw={"projection": "3d"}) 
     
     fig.set_figheight(10)
     fig.set_figwidth(15)

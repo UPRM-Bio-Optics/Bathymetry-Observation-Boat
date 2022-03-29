@@ -19,9 +19,12 @@ TODO
 # https://hacks.mozilla.org/2017/02/headless-raspberry-pi-configuration-over-bluetooth/
 
 # 2D graphing function
-def graph2d(lon, lat, topo) -> None:
+def graph(lon, lat, topo, threeD: bool) -> None:
 
-    fig, ax1 = plt.subplots()     
+    if(threeD):
+        fig, ax1 = plt.subplots(subplot_kw={"projection": "3d"})
+    else:
+        fig, ax1 = plt.subplots()     
     
     fig.set_figheight(10)
     fig.set_figwidth(15)
@@ -53,41 +56,6 @@ def graph2d(lon, lat, topo) -> None:
     today = date.today().strftime("%b-%d-%Y")
     plt.savefig(os.getcwd() + '/Data/Graphs/' + today + 'TwoD map.png')
 
-# 3D graphing function
-def graph3d(lon, lat, topo) -> None:
-
-
-    fig, ax1 = plt.subplots(subplot_kw={"projection": "3d"})    
-    fig.set_figheight(10)
-    fig.set_figwidth(15)
-    xi = np.linspace(min(lon), max(lon), len(lon))
-    yi = np.linspace(min(lat), max(lat), len(lat))
-    
-    zi = griddata((lon ,lat), topo, (xi[None,:], yi[:,None]), method='linear')
-    
-    """     m = basemap.Basemap(llcrnrlat= min(lat), llcrnrlon= min(lon), 
-                        urcrnrlat= max(lat), urcrnrlon=max(lon), 
-                        width= max(lat) - min(lat), 
-                        height= max(lon) - min(lon),
-                        projection='merc',
-                        resolution='c')
-    
-    m.drawCoastLine() """
-    cntr1 = ax1.contourf(xi, yi, zi, levels=30,cmap= cm.coolwarm)
-    cbar = fig.colorbar(cntr1, ax=ax1)
-    cbar.set_label('Depth in Feet', fontsize = 20)
-    #ax1.plot(lon, lat, 'bo', ms=1)
-    ax1.set(xlim=(min(lon) , max(lon)), ylim=(min(lat), max(lat)))
-    
-    ax1.set_title('Bathymetry Map in Parguera', fontsize = 20)
-    ax1.set_xlabel('Latitude', fontsize = 20)
-    ax1.set_ylabel('Longitude', fontsize = 20)
-    plt.savefig("test3d.png")
-    plt.show()
-
-    today = date.today().strftime("%b-%d-%Y")
-    plt.savefig(os.getcwd() + '/Data/Graphs/' + today + 'ThreeD map.png')
-    ##plt.show()
 
 # Function to determines if vehicle is armed or not done with missions
 def isScannable(vehicle, cmds, missionlist) -> bool:
@@ -182,16 +150,15 @@ def run():
 
     # Graph CSV data
     try:
-
-        graph2d(lon, lat, topo)
-        graph3d(lon, lat, topo)
+        graph(lon, lat, topo, threeD = False)
+        graph(lon, lat, topo, threeD = True)
     except Exception as e:
-
+        
         print(' AT least you tried graphs :|')
         row = ['could not graph', 'error', e]
         writer.writerow(row)
-
-    # Close CSV file
+    
+    # Close CSV file and EchoSounder Port
     csvfile.close()
     ser.close()
 
