@@ -1,44 +1,28 @@
 
-import sys
-import glob
 import serial
 import pynmea2
-import numpy as np
-import time
 import csv
-import os
-from datetime import date
-import matplotlib.pyplot as plt
+import numpy as np
 from scipy.interpolate import griddata
+import matplotlib.pyplot as plt
 from matplotlib import cm
-import cartopy.crs as crs
-def serial_ports():
-    """ Lists serial port names
+from dronekit import connect
+from datetime import date
+from time import sleep
+import os
+import dronekit_sitl
+import pandas as pd
 
-        :raises EnvironmentError:
-            On unsupported or unknown platforms
-        :returns:
-            A list of the serial ports available on the system
-    """
-    if sys.platform.startswith('win'):
-        ports = ['COM%s' % (i + 1) for i in range(256)]
-    elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
-        # this excludes your current terminal "/dev/tty"
-        ports = glob.glob('/dev/tty[A-Za-z]*')
-    elif sys.platform.startswith('darwin'):
-        ports = glob.glob('/dev/tty.*')
-    else:
-        raise EnvironmentError('Unsupported platform')
-
-    result = []
-    for port in ports:
-        try:
-            s = serial.Serial(port)
-            s.close()
-            result.append(port)
-        except (OSError, serial.SerialException):
-            pass
-    return result
+from bokeh.io import output_notebook
+from bokeh.io import show
+from bokeh.models import ColumnDataSource
+from bokeh.plotting import gmap
+from bokeh.models import GMapOptions
+from bokeh.models import HoverTool
+from bokeh.io import export_png
+from bokeh.transform import linear_cmap
+from bokeh.palettes import Plasma256 as palette
+from bokeh.models import ColorBar
 
 
 def main():
@@ -92,46 +76,95 @@ def main():
         print('DONE!!!!')
 
 
-def graphTest():
-
-    file = open("data/depth_data/Mar-25-2022.csv")
-    csvReader = csv.reader(file)
-    header = next(csvReader)
-    lat, lon, topo = np.loadtxt(file, delimiter=',', skiprows=2, unpack=True)
-
-    topo = -topo
-    fig, ax1 = plt.subplots(subplot_kw={'projection': crs.PlateCarree()}) 
+def graph(csvpath: str, threeD=False) -> None:
     
+    
+    df = pd.read_csv(csvpath)
+    lat = df.Latitude
+    lon = df.Longitude
+    topo = df.Depth_in_Feet
+    
+    if(threeD):
+        fig, ax1 = plt.subplots(subplot_kw={"projection": "3d"})
+        fileName = "ThreeD Map.png"
+    else:
+        fig, ax1 = plt.subplots()
+        fileName = "TwoD Map.png"
+
     fig.set_figheight(10)
     fig.set_figwidth(15)
     xi = np.linspace(min(lon), max(lon), len(lon))
     yi = np.linspace(min(lat), max(lat), len(lat))
-    
-    zi = griddata((lon ,lat), topo, (xi[None,:], yi[:,None]), method='linear')
-    
 
+    zi = griddata((lon, lat), 
+                  topo,
+                  (xi[None, :], yi[:, None]), 
+                  method='linear')
 
-    #ax1.plot(lon, lat, 'bo', ms=1)
-    
-    cntr1 = ax1.contourf(xi, yi, zi, levels=30,cmap= cm.coolwarm, transform = crs.PlateCarree())
-    ax1.coastlines(resolution='10m', color='black', linewidth=1)
-    ax1.add_feature(crs.cartopy.feature.OCEAN)
-    ax1.set(xlim=(min(lon) , max(lon)), ylim=(min(lat), max(lat)))
-    aug = 200
-    ax1.set_extent([min(lon) - aug*np.std(lon), 
-                    max(lon) + aug*np.std(lon), 
-                    min(lat) - aug*np.std(lat) , 
-                    max(lat) + aug*np.std(lat)] ,
-                    crs=crs.PlateCarree())
-    
+    cntr1 = ax1.contourf(xi, yi, zi, levels=30, cmap=cm.coolwarm)
     cbar = fig.colorbar(cntr1, ax=ax1)
-    cbar.set_label('Depth in Feet', fontsize = 20)
-    ax1.set_title('Bathymetry Map in Parguera', fontsize = 20)
-    ax1.set_xlabel('Latitude', fontsize = 20)
-    ax1.set_ylabel('Longitude', fontsize = 20)
-    #plt.savefig("test3d.png")
-    plt.show()
+    cbar.set_label('Depth in Feet', fontsize=20)
 
+    # uncomment to see where each sample was taken
+    #ax1.plot(lon, lat, 'bo', ms=1)
 
+    ax1.set(xlim=(min(lon), max(lon)), ylim=(min(lat), max(lat)))
+
+    ax1.set_title('Bathymetry Map in Parguera', fontsize=20)
+    ax1.set_xlabel('Latitude', fontsize=20)
+    ax1.set_ylabel('Longitude', fontsize=20)
+
+    today = date.today().strftime("%b-%d-%Y")
+    plt.savefig(os.getcwd() + '/Data/Graphs/'+ today +' '+ fileName)
+
+    
+    if(threeD):
+        return
+    graph(csvpath, threeD=True)
+    
+    
+def mapOverlay(csvpath: str, zoom=16, map_type='roadmap'):
+    
+    api_key = os.environ['GOOGLE_API_KEY']
+    bokeh_width, bokeh_height = 500,400
+    
+    df = pd.read_csv(csvpath)
+
+    lat = np.mean(df.Latitude)
+    lon = np.mean(df.Longitude)
+    
+    gmap_options = GMapOptions(lat=lat, lng=lon,
+                               map_type=map_type, zoom=zoom)
+    hover = HoverTool(
+        tooltips=[
+            ('Depth in Feet', '@Depth_in_Feet '),
+            # the {0.} means that we don't want decimals
+            # for 1 decimal, write {0.0}
+        ]
+    )
+    p = gmap(api_key, gmap_options, title='Bathymetry Map Parguera',
+             width=bokeh_width, height=bokeh_height,
+             tools=[hover, 'reset', 'wheel_zoom', 'pan'])
+    source = ColumnDataSource(df)
+    # defining a color mapper, that will map values of pricem2
+    # between 2000 and 8000 on the color palette
+    mapper = linear_cmap('Depth_in_Feet', palette, min(df.Depth_in_Feet), max(df.Depth_in_Feet))
+    # we use the mapper for the color of the circles
+    center = p.circle('Longitude', 'Latitude', radius='radius', alpha=0.4,
+                      color=mapper, source=source)
+    # and we add a color scale to see which values the colors
+    # correspond to
+    color_bar = ColorBar(color_mapper=mapper['transform'],
+                         location=(0, 0))
+    p.add_layout(color_bar, 'right')
+    p.background_fill_color = None
+    p.border_fill_color = None
+
+    today = date.today().strftime("%b-%d-%Y")
+    filename = os.getcwd() + '/Data/Graphs/'+ today + "MapOverlay.png"
+    export_png(p, filename=filename)
+    return p
+# Function to determines if vehicle is armed or not done with missions
 if __name__ == '__main__':
-    graphTest()
+    csvpath = os.getcwd() + '/Data/depth_data/Mar-25-2022.csv'
+    graph(csvpath)
