@@ -1,5 +1,4 @@
-from cProfile import label
-from msilib.schema import Font
+
 import sys
 import glob
 import serial
@@ -12,7 +11,7 @@ from datetime import date
 import matplotlib.pyplot as plt
 from scipy.interpolate import griddata
 from matplotlib import cm
-
+import cartopy.crs as crs
 def serial_ports():
     """ Lists serial port names
 
@@ -95,13 +94,13 @@ def main():
 
 def graphTest():
 
-    file = open("Mar-25-2022.csv")
+    file = open("data/depth_data/Mar-25-2022.csv")
     csvReader = csv.reader(file)
     header = next(csvReader)
     lat, lon, topo = np.loadtxt(file, delimiter=',', skiprows=2, unpack=True)
 
     topo = -topo
-    fig, ax1 = plt.subplots(subplot_kw={"projection": "3d"}) 
+    fig, ax1 = plt.subplots(subplot_kw={'projection': crs.PlateCarree()}) 
     
     fig.set_figheight(10)
     fig.set_figwidth(15)
@@ -110,24 +109,27 @@ def graphTest():
     
     zi = griddata((lon ,lat), topo, (xi[None,:], yi[:,None]), method='linear')
     
-    """     m = basemap.Basemap(llcrnrlat= min(lat), llcrnrlon= min(lon), 
-                        urcrnrlat= max(lat), urcrnrlon=max(lon), 
-                        width= max(lat) - min(lat), 
-                        height= max(lon) - min(lon),
-                        projection='merc',
-                        resolution='c')
+
+
+    #ax1.plot(lon, lat, 'bo', ms=1)
     
-    m.drawCoastLine() """
-    cntr1 = ax1.contourf(xi, yi, zi, levels=30,cmap= cm.coolwarm)
+    cntr1 = ax1.contourf(xi, yi, zi, levels=30,cmap= cm.coolwarm, transform = crs.PlateCarree())
+    ax1.coastlines(resolution='10m', color='black', linewidth=1)
+    ax1.add_feature(crs.cartopy.feature.OCEAN)
+    ax1.set(xlim=(min(lon) , max(lon)), ylim=(min(lat), max(lat)))
+    aug = 200
+    ax1.set_extent([min(lon) - aug*np.std(lon), 
+                    max(lon) + aug*np.std(lon), 
+                    min(lat) - aug*np.std(lat) , 
+                    max(lat) + aug*np.std(lat)] ,
+                    crs=crs.PlateCarree())
+    
     cbar = fig.colorbar(cntr1, ax=ax1)
     cbar.set_label('Depth in Feet', fontsize = 20)
-    #ax1.plot(lon, lat, 'bo', ms=1)
-    ax1.set(xlim=(min(lon) , max(lon)), ylim=(min(lat), max(lat)))
-    
     ax1.set_title('Bathymetry Map in Parguera', fontsize = 20)
     ax1.set_xlabel('Latitude', fontsize = 20)
     ax1.set_ylabel('Longitude', fontsize = 20)
-    plt.savefig("test3d.png")
+    #plt.savefig("test3d.png")
     plt.show()
 
 

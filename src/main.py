@@ -11,40 +11,38 @@ from datetime import date
 from time import sleep
 import os
 import basemap
-
+import dronekit_sitl 
 '''
 TODO
 - make scannable variable into function -> boolean
 '''
 # https://hacks.mozilla.org/2017/02/headless-raspberry-pi-configuration-over-bluetooth/
 
-# 2D graphing function
-def graph(lon, lat, topo, threeD: bool) -> None:
+# 2D and 3D graphing function in Matplotlib (Contour)
+def graph(lon, lat, topo, threeD = False) -> None:
 
+    
     if(threeD):
         fig, ax1 = plt.subplots(subplot_kw={"projection": "3d"})
+        fileName = "ThreeD Map.png"
     else:
         fig, ax1 = plt.subplots()     
-    
+        fileName = "TwoD Map.png"
+        
     fig.set_figheight(10)
     fig.set_figwidth(15)
     xi = np.linspace(min(lon), max(lon), len(lon))
     yi = np.linspace(min(lat), max(lat), len(lat))
     
     zi = griddata((lon ,lat), topo, (xi[None,:], yi[:,None]), method='linear')
-    
-    """     m = basemap.Basemap(llcrnrlat= min(lat), llcrnrlon= min(lon), 
-                        urcrnrlat= max(lat), urcrnrlon=max(lon), 
-                        width= max(lat) - min(lat), 
-                        height= max(lon) - min(lon),
-                        projection='merc',
-                        resolution='c')
-    
-    m.drawCoastLine() """
+
     cntr1 = ax1.contourf(xi, yi, zi, levels=30,cmap= cm.coolwarm)
     cbar = fig.colorbar(cntr1, ax=ax1)
     cbar.set_label('Depth in Feet', fontsize = 20)
+    
+    #uncomment to see where each sample was taken
     #ax1.plot(lon, lat, 'bo', ms=1)
+    
     ax1.set(xlim=(min(lon) , max(lon)), ylim=(min(lat), max(lat)))
     
     ax1.set_title('Bathymetry Map in Parguera', fontsize = 20)
@@ -54,9 +52,57 @@ def graph(lon, lat, topo, threeD: bool) -> None:
     plt.show()
     
     today = date.today().strftime("%b-%d-%Y")
-    plt.savefig(os.getcwd() + '/Data/Graphs/' + today + 'TwoD map.png')
+    plt.savefig(os.getcwd() + '/Data/Graphs/' + today + fileName)
+    
+    graph(lon, lat, topo, threeD=True)
 
+def mapOverlay(lat,lon, csvpath: str, zoom=16, map_type='roadmap'):
+    
+    import pandas as pd
+    
+    from bokeh.io import output_notebook
+    from bokeh.io import show
+    from bokeh.plotting import gmap
+    from bokeh.models import GMapOptions
+    from bokeh.models import HoverTool
+    from bokeh.io import export_png
+    from bokeh.transform import linear_cmap
+    from bokeh.palettes import Plasma256 as palette
+    from bokeh.models import ColorBar
+    
+    df = pd.read_csv('C:/Users/dasus/Documents/NCAS-M/NCAS/Data/depth_data/Mar-25-2022.csv')
 
+    gmap_options = GMapOptions(lat=lat, lng=lng, 
+                               map_type=map_type, zoom=zoom)
+    hover = HoverTool(
+        tooltips = [
+            ('Depth in Feet', '@Depth_in_Feet '),
+            # the {0.} means that we don't want decimals
+            # for 1 decimal, write {0.0}
+        ]
+    )
+    p = gmap(api_key, gmap_options, title='Bathymetry Map Parguera', 
+             width=bokeh_width, height=bokeh_height,
+             tools=[hover, 'reset', 'wheel_zoom', 'pan'])
+    source = ColumnDataSource(df)
+    # defining a color mapper, that will map values of pricem2
+    # between 2000 and 8000 on the color palette
+    mapper = linear_cmap('Depth', palette, min(df.Depth), max(df.Depth))    
+    # we use the mapper for the color of the circles
+    center = p.circle('Longitude', 'Latitude', radius='radius', alpha=0.4, 
+                      color=mapper, source=source)
+    # and we add a color scale to see which values the colors 
+    # correspond to 
+    color_bar = ColorBar(color_mapper=mapper['transform'], 
+                         location=(0,0))
+    p.add_layout(color_bar, 'right')
+    p.background_fill_color = None
+    p.border_fill_color = None
+    
+    
+
+    export_png(p, filename="plot.png") 
+    return p
 # Function to determines if vehicle is armed or not done with missions
 def isScannable(vehicle, cmds, missionlist) -> bool:
     return vehicle.armed or cmds.next <= len(missionlist)
@@ -76,7 +122,7 @@ def run():
     # Create and initialize csv file
     csvfile = open(os.getcwd() + '/Data/depth_data/' + today + '.csv', 'w')
     writer = csv.writer(csvfile)
-    _header = ['Latitude', 'Longitude', 'Depth in Feet']
+    _header = ['Latitude', 'Longitude', 'Depth_in_Feet']
     writer.writerow(_header)
 
     # Pixhawk connection loop
@@ -148,19 +194,22 @@ def run():
 
     print('Done with Mission ')
 
+    # Close CSV file and EchoSounder Port
+    csvfile.close()
+    ser.close()
+    
     # Graph CSV data
     try:
-        graph(lon, lat, topo, threeD = False)
-        graph(lon, lat, topo, threeD = True)
+        graph(lon, lat, topo)
+        mapOverlay(lat, lon, csvfile.name)
+        
     except Exception as e:
         
         print(' AT least you tried graphs :|')
         row = ['could not graph', 'error', e]
         writer.writerow(row)
     
-    # Close CSV file and EchoSounder Port
-    csvfile.close()
-    ser.close()
+
 
 # Main function
 if __name__ == '__main__':

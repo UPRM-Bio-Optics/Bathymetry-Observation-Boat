@@ -21,7 +21,14 @@ def main():
                         'numpy'])
     subprocess.check_call([sys.executable, '-m', 'pip', 'install',
                         'requests'])
-
+    subprocess.check_call([sys.executable, '-m', 'pip', 'install',
+                        'pandas'])
+    subprocess.check_call([sys.executable, '-m', 'pip', 'install',
+                        'bokeh'])    
+    subprocess.check_call([sys.executable, '-m', 'pip', 'install',
+                        'requests'])
+    subprocess.check_call([sys.executable, '-m', 'pip', 'install',
+                        'selenium'])    
 
 if __name__ == '__main__':
     main()
