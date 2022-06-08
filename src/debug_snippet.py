@@ -1,4 +1,5 @@
 
+from turtle import title
 import serial
 import pynmea2
 import csv
@@ -6,11 +7,11 @@ import numpy as np
 from scipy.interpolate import griddata
 import matplotlib.pyplot as plt
 from matplotlib import cm
-from dronekit import connect
+#from dronekit import connect
 from datetime import date
 from time import sleep
 import os
-import dronekit_sitl
+#import dronekit_sitl
 import pandas as pd
 
 from bokeh.io import output_notebook
@@ -80,6 +81,7 @@ def graph(csvpath: str, threeD=False) -> None:
     
     
     df = pd.read_csv(csvpath)
+    df['radius'] = np.sqrt(df['Depth_in_Feet'])/0.8
     lat = df.Latitude
     lon = df.Longitude
     topo = df.Depth_in_Feet
@@ -123,13 +125,14 @@ def graph(csvpath: str, threeD=False) -> None:
     graph(csvpath, threeD=True)
     
     
-def mapOverlay(csvpath: str, zoom=16, map_type='roadmap'):
+def mapOverlay(csvpath: str, zoom=18, map_type='satellite'):
     
     api_key = os.environ['GOOGLE_API_KEY']
     bokeh_width, bokeh_height = 500,400
     
     df = pd.read_csv(csvpath)
-
+    df['radius'] = np.sqrt(df['Depth_in_Feet'])/0.8
+        
     lat = np.mean(df.Latitude)
     lon = np.mean(df.Longitude)
     
@@ -155,16 +158,22 @@ def mapOverlay(csvpath: str, zoom=16, map_type='roadmap'):
     # and we add a color scale to see which values the colors
     # correspond to
     color_bar = ColorBar(color_mapper=mapper['transform'],
-                         location=(0, 0))
+                         location=(0, 0),
+                         title='Depth in Feet',
+                         
+                         )
+   
+    ColorBar.title_text_font_size = 20
     p.add_layout(color_bar, 'right')
     p.background_fill_color = None
     p.border_fill_color = None
 
     today = date.today().strftime("%b-%d-%Y")
-    filename = os.getcwd() + '/Data/Graphs/'+ today + "MapOverlay.png"
+    filename = os.getcwd() + '/Data/Graphs/'+ today + ' ' +"MapOverlay.png"
     export_png(p, filename=filename)
     return p
 # Function to determines if vehicle is armed or not done with missions
 if __name__ == '__main__':
     csvpath = os.getcwd() + '/Data/depth_data/Mar-25-2022.csv'
     graph(csvpath)
+    mapOverlay(csvpath)

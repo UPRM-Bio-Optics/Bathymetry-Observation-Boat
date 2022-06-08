@@ -170,7 +170,7 @@ def run():
     ser = serial.Serial(_echosounder_port, baudrate=4800, timeout=2)
     row = [None, None, None]
     scannable = vehicle.armed
-
+    currentWaypoint = vehicle.commands.next
     # for i in range(50): #stop deleting this
 
     while scannable:
@@ -209,8 +209,8 @@ def run():
             csvfile.flush()    # Save current data to CSV
             row = [None, None, None]
             sleep(0.1)
-        scannable = vehicle.armed
-
+        scannable = vehicle.armed and currentWaypoint <= len(missionlist)
+        currentWaypoint = vehicle.commands.next
     print('Done with Mission ')
 
 
