@@ -30,6 +30,6 @@ if __name__ == '__main__':
         f = open("latestIP.txt", "w")
         f.write(message)
         f.close()
-        print("Closing")
+        print('Closing')
         time.sleep(100)
     
