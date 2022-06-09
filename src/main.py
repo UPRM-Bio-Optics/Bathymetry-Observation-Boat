@@ -1,4 +1,4 @@
-
+from turtle import title
 import serial
 import pynmea2
 import csv
@@ -6,23 +6,19 @@ import numpy as np
 from scipy.interpolate import griddata
 import matplotlib.pyplot as plt
 from matplotlib import cm
-from dronekit import connect
+#from dronekit import connect
 from datetime import date
 from time import sleep
 import os
-import dronekit_sitl
+#import dronekit_sitl
 import pandas as pd
 
-from bokeh.io import output_notebook
-from bokeh.io import show
-from bokeh.models import ColumnDataSource
-from bokeh.plotting import gmap
-from bokeh.models import GMapOptions
-from bokeh.models import HoverTool
+from bokeh.plotting import gmap, figure
+from bokeh.models import GMapOptions, HoverTool, LogTicker, ColorBar, ColumnDataSource
 from bokeh.io import export_png
 from bokeh.transform import linear_cmap
 from bokeh.palettes import Plasma256 as palette
-from bokeh.models import ColorBar
+from bokeh.layouts import row
 '''
 TODO
 - make scannable variable into function -> boolean
@@ -79,13 +75,14 @@ def Contour(csvpath: str, threeD=False) -> None:
     Contour(csvpath, threeD=True)
     
  
-def MapOverlay(csvpath: str, zoom=16, map_type='roadmap'):
+def MapOverlay(csvpath: str, zoom=18, map_type='satellite'):
     
     api_key = os.environ['GOOGLE_API_KEY']
     bokeh_width, bokeh_height = 500,400
     
     df = pd.read_csv(csvpath)
-
+    df['radius'] = np.sqrt(df['Depth_in_Feet'])/0.8
+        
     lat = np.mean(df.Latitude)
     lon = np.mean(df.Longitude)
     
@@ -111,15 +108,29 @@ def MapOverlay(csvpath: str, zoom=16, map_type='roadmap'):
     # and we add a color scale to see which values the colors
     # correspond to
     color_bar = ColorBar(color_mapper=mapper['transform'],
-                         location=(0, 0))
-    p.add_layout(color_bar, 'right')
-    p.background_fill_color = None
-    p.border_fill_color = None
+                         location=(0, 0), label_standoff=12,
+                         ticker=LogTicker(), border_line_color=None
+                         )
+    
+    color_bar_title = figure(title='Depth in Feet', title_location='left',
+                             height=400,
+                             width=200,
+                             toolbar_location=None, min_border=0, 
+                             outline_line_color=None
+                             )
+    
+    color_bar_title.add_layout(color_bar, 'left')
+    color_bar_title.title.align="center"
+    color_bar_title.title.text_font_size = '12pt'
+ 
+    
 
+
+    pu = row(p, color_bar_title)
     today = date.today().strftime("%b-%d-%Y")
-    filename = os.getcwd() + '/Data/Graphs/'+ today + "MapOverlay.png"
-    export_png(p, filename=filename)
-    return p
+    filename = os.getcwd() + '/Data/Graphs/'+ today + ' ' +"MapOverlay.png"
+    export_png(pu, filename=filename)
+    return pu
 
 
 # Function to determines if vehicle is armed or not done with missions
