@@ -4,6 +4,7 @@ import os.path
 
 # Constants
 ROOT_DIR = os.path.abspath(os.curdir)
+GRAPHS_DIR = ROOT_DIR+'\\Data\\Graphs'
 
 
 def showGraphsMenu():
@@ -12,18 +13,17 @@ def showGraphsMenu():
     file_list_column = [
         [
             gui.Text("Graphs Folder"),
-            gui.In(enable_events=True, key="-FOLDER-"),
-            gui.FolderBrowse(initial_folder=ROOT_DIR+'\\Data\\Graphs'),
+            gui.InputText(default_text=GRAPHS_DIR , enable_events=True, key="-FOLDER-"),
+            gui.FolderBrowse(initial_folder=GRAPHS_DIR),
         ],
         [
-            gui.Listbox(values=[], size=(65,100), enable_events=True, key="-FILE LIST-")
+            gui.Listbox(values=os.listdir(GRAPHS_DIR), size=(65,100), enable_events=True, key="-FILE LIST-")
         ],
     ]
 
     # For now will only show the name of the file that was chosen
     image_viewer_column = [
-        [gui.Text("Choose a graph from the list on the left", size=(200,), justification='center')],
-        [gui.Text(size=(200, 0), key="-TOUT-")],
+        [gui.Text("Choose a graph from the list on the left", size=(200,), justification='center', key="-TOUT-")],
         [gui.Image(expand_x='true', key="-IMAGE-")],
     ]
 
@@ -61,13 +61,14 @@ def showGraphsMenu():
                 if os.path.isfile(os.path.join(folder, f))
                 and f.lower().endswith((".png", ".gif"))
             ]
+
             window["-FILE LIST-"].update(fnames)
         elif event == "-FILE LIST-":  # A file was chosen from the listbox
             try:
                 filename = os.path.join(
                     values["-FOLDER-"], values["-FILE LIST-"][0]
                 )
-                window["-TOUT-"].update('')
+                window["-TOUT-"].update(values["-FILE LIST-"][0])
                 window["-IMAGE-"].update(filename=filename)
 
             except:

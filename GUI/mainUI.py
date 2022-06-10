@@ -18,13 +18,11 @@ layout =    [
                 # Spacing
                 [gui.Text(text="")],
                 [gui.Text(text="")],
-                [gui.Text(text="")],
 
                 # CSV Button
                 [gui.Button(button_text="Analyze CSV File", font=fontType, expand_x='true')],
 
                 # Spacing
-                [gui.Text(text="")],
                 [gui.Text(text="")],
                 [gui.Text(text="")],
 
