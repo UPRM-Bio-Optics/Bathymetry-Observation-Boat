@@ -29,6 +29,8 @@ def main():
                         'requests'])
     subprocess.check_call([sys.executable, '-m', 'pip', 'install',
                         'selenium'])    
+    subprocess.check_call([sys.executable, '-m', 'pip', 'install',
+                        'pysimplegui'])  
 
 if __name__ == '__main__':
     main()
