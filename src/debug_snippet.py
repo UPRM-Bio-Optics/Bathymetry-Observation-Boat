@@ -1,6 +1,4 @@
 
-from ctypes import alignment
-from turtle import title
 import serial
 import pynmea2
 import csv
@@ -8,7 +6,7 @@ import numpy as np
 from scipy.interpolate import griddata
 import matplotlib.pyplot as plt
 from matplotlib import cm
-#from dronekit import connect
+from dronekit import connect
 from datetime import date
 from time import sleep
 import os

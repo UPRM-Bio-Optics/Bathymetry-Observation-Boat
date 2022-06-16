@@ -1,4 +1,4 @@
-from turtle import title
+
 import serial
 import pynmea2
 import csv
@@ -6,7 +6,7 @@ import numpy as np
 from scipy.interpolate import griddata
 import matplotlib.pyplot as plt
 from matplotlib import cm
-#from dronekit import connect
+from dronekit import connect
 from datetime import date
 from time import sleep
 import os
@@ -25,11 +25,19 @@ TODO
 '''
 # https://hacks.mozilla.org/2017/02/headless-raspberry-pi-configuration-over-bluetooth/
 
-# 2D and 3D graphing function in Matplotlib (Contour)
 
 
 def Contour(csvpath: str, threeD=False) -> None:
     
+    """ 
+    creates contour plot from topographical data obtained from echosounder
+    
+
+    Args:
+        csvpath (str): path to csv containing data: Lat, Lon, Depth in feet
+        threeD (bool, optional): boolean flag to determine which map to make; 2D or 3D. 
+            Defaults to False.
+    """
     
     df = pd.read_csv(csvpath)
     lat = df.Latitude
@@ -67,21 +75,30 @@ def Contour(csvpath: str, threeD=False) -> None:
     ax1.set_ylabel('Longitude', fontsize=20)
 
     today = date.today().strftime("%b-%d-%Y")
-    plt.savefig(os.getcwd() + '/Data/Graphs/'+ today + fileName)
+    plt.savefig(os.getcwd() + '/Data/Graphs/' + today + fileName)
 
     
     if(threeD):
         return
     Contour(csvpath, threeD=True)
-    
  
-def MapOverlay(csvpath: str, zoom=18, map_type='satellite'):
     
+def MapOverlay(csvpath: str, zoom=18, map_type='satellite') -> row:
+    """ Creates overlay of Depth Data with a map. 
+
+    Args:
+        csvpath (str): Path to csv containing data: Lat, Lon, Depth in feet
+        zoom (int, optional):  Defaults to 18.
+        map_type (str, optional): type of google map. Defaults to 'satellite'.
+
+    Returns:
+        row: bokeh row object
+    """
     api_key = os.environ['GOOGLE_API_KEY']
     bokeh_width, bokeh_height = 500,400
     
     df = pd.read_csv(csvpath)
-    df['radius'] = np.sqrt(df['Depth_in_Feet'])/0.8
+    df['radius'] = np.sqrt(df['Depth_in_Feet'])/ (zoom - (zoom - 20)) # wack ass line to test different radius
         
     lat = np.mean(df.Latitude)
     lon = np.mean(df.Longitude)
@@ -133,12 +150,24 @@ def MapOverlay(csvpath: str, zoom=18, map_type='satellite'):
     return pu
 
 
-# Function to determines if vehicle is armed or not done with missions
 def isScannable(vehicle, cmds, missionlist) -> bool:
+    """
+    Args:
+        vehicle (DroneKit object): 
+        cmds (iterable): vehicle command / waypoints 
+        missionlist (iterable): list created from cmds
+
+    Returns:
+        bool: is Mission Finished.
+    """
     return vehicle.armed or cmds.next <= len(missionlist)
 
-# Run
-def run():
+
+def main():
+    
+    """
+    Main Program to be executed
+    """
     # Initialize ports for pixhawk and echosounder
     _vehicle_port = '/dev/ttyACM0'
     _echosounder_port = '/dev/ttyUSB0'
@@ -241,6 +270,6 @@ def run():
     csvfile.close()
     ser.close()
 
-# Main function
+
 if __name__ == '__main__':
     run()
