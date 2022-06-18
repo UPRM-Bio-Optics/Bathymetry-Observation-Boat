@@ -285,7 +285,7 @@ def errorWindow(text):
         [gui.Text(text="")],
 
         # Ok Button
-        [gui.Button(button_text="Ok",
+        [gui.Button(button_text="OK",
                     expand_x='true'
                     )],
     ]
