@@ -21,7 +21,6 @@ ROOT_DIR = os.path.abspath(os.curdir)
 GRAPHS_DIR = ROOT_DIR+'\\Data\\Graphs'
 CSV_DIR = ROOT_DIR+'\\Data\\depth_data'
 
-
 def showGraphsMenu():
 
     # First the window layout in 2 columns
