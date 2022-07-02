@@ -8,10 +8,15 @@ import ctypes
 import platform
 from graphs_gui import showGraphsMenu, showCSVgraph
 
-def run():
+def main():
 
     # Set theme
-    gui.theme('Dark Green 6')
+    # gui.theme('Dark Green 6')
+    gui.theme('Blue Mono')
+    # gui.theme('Light Green 5')
+    # gui.theme('Green Mono')
+
+
 
     # Font type
     font = 'arial 12'
@@ -177,4 +182,5 @@ def run():
 #     return (retval, output)
 
 
-run()
+if __name__ == '__main__':
+    main()
