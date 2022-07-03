@@ -6,13 +6,13 @@ import numpy as np
 from scipy.interpolate import griddata
 import matplotlib.pyplot as plt
 from matplotlib import cm
-from dronekit import connect
+#from dronekit import connect
 from datetime import date
 from time import sleep
 import os
 #import dronekit_sitl
 import pandas as pd
-
+from time import sleep
 from bokeh.plotting import gmap, figure
 from bokeh.models import GMapOptions, HoverTool, LogTicker, ColorBar, ColumnDataSource
 from bokeh.io import export_png
@@ -175,8 +175,20 @@ def mapOverlay(csvpath: str, zoom=18, map_type='satellite'):
     filename = os.getcwd() + '/Data/Graphs/'+ today + ' ' +"MapOverlay.png"
     export_png(pu, filename=filename)
     return pu
-# Function to determines if vehicle is armed or not done with missions
+
+def spectro():
+    import seabreeze
+    seabreeze.use('pyseabreeze')
+    from seabreeze.spectrometers import Spectrometer 
+    
+    spec = Spectrometer.from_first_available()# Function to determines if vehicle is armed or not done with missions
+    spec.integration_time_micros(100000)
+    for i in range(10):
+        
+        print(f'Intensities :{spec.intensities()}', f'\n Wavelengths: {spec.wavelengths()}')
+        print('='*30)
+        sleep(1)
+        
+    
 if __name__ == '__main__':
-    csvpath = os.getcwd() + '/Data/depth_data/Mar-25-2022.csv'
-    graph(csvpath)
-    mapOverlay(csvpath)
+    spectro()

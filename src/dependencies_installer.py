@@ -33,6 +33,7 @@ def main():
                         'selenium'])    
     subprocess.check_call([sys.executable, '-m', 'pip', 'install',
                         'pysimplegui'])  
-
+    subprocess.check_call([sys.executable, '-m', 'pip', 'install',
+                        'seabreeze[pyseabreeze]'])
 if __name__ == '__main__':
     main()
