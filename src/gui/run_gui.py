@@ -8,19 +8,26 @@ import ctypes
 import platform
 from graphs_gui import showGraphsMenu, showCSVgraph
 
-def run():
+def main():
+
     # Set theme
-    gui.theme('Dark Green 6')
+    # gui.theme('Dark Green 6')
+    gui.theme('Blue Mono')
+    # gui.theme('Light Green 5')
+    # gui.theme('Green Mono')
+
+
 
     # Font type
-    font = 'courier'
+    font = 'arial 12'
+    titleFont = 'arial 24'
 
     # Define layout
     layout = [
         # Title
         [gui.Text(
             text="Hydronautical Observation Platform for Hydrographic Sounding",
-            font=(font+' 16')
+            font=titleFont
         )],
 
         # Spacing
@@ -101,18 +108,21 @@ def run():
 
             output.print('\n--> '+values['_IN_']+'\n')
 
-            # Send commands to shell                 
-            process = subprocess.run(
-                args=values['_IN_'], 
-                shell=True, 
-                # stdout=subprocess.PIPE, 
-                # stderr=subprocess.PIPE,
-                capture_output=True
-                ).stdout
+            try: 
+                # Send commands to shell                 
+                process = subprocess.run(
+                    args=values['_IN_'], 
+                    shell=True, 
+                    capture_output=True
+                    ).stdout
 
-            process = process.decode(errors='backslashreplace').rstrip()
+                process = process.decode(errors='replace').rstrip()
+                # process = process.decode(errors='backslashreplace').rstrip()
+                output.print(process)
             
-            output.print(process)
+            except:
+                output.print('Super Mega Fatal Error: WOW!')
+                continue
             # Parse and write stdout to gui
 #             for line in process:
                 
@@ -145,6 +155,8 @@ def run():
     # Exit GUI
     window.close()
 
+    print('...GUI ended.')
+
 # # This function does the actual "running" of the command.  
 # # Also watches for any output. If found output is printed
 # def runCommand(cmd, timeout=None, window=None):
@@ -170,4 +182,5 @@ def run():
 #     return (retval, output)
 
 
-run()
+if __name__ == '__main__':
+    main()
