@@ -2,9 +2,11 @@ import sys
 import subprocess
 
 # This script installs the necesarry libraries for the program to run
-
 # Implement pip as a subprocess:
 def main():
+    """
+    Run This Python Script install all the dependencies on any OS
+    """
     subprocess.check_call([sys.executable, '-m', 'pip', 'install',
                         'dronekit'])
     subprocess.check_call([sys.executable, '-m', 'pip', 'install',
@@ -29,6 +31,9 @@ def main():
                         'requests'])
     subprocess.check_call([sys.executable, '-m', 'pip', 'install',
                         'selenium'])    
-
+    subprocess.check_call([sys.executable, '-m', 'pip', 'install',
+                        'pysimplegui'])  
+    subprocess.check_call([sys.executable, '-m', 'pip', 'install',
+                        'seabreeze[pyseabreeze]'])
 if __name__ == '__main__':
     main()
