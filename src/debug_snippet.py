@@ -173,7 +173,6 @@ def mapOverlay(csvpath: str, zoom=18, map_type='satellite'):
     pu = row(p, color_bar_title)
     today = date.today().strftime("%b-%d-%Y")
     filename = os.getcwd() + '/Data/Graphs/'+ today + ' ' +"MapOverlay.png"
-<<<<<<< HEAD
     export_png(p, filename=filename)
     return p
 # Function to determines if vehicle is armed or not done with missions
@@ -190,12 +189,8 @@ def juice():
     print(f'The PiJuice Battery Status is: {battery_status}\n')
     print(f'The Pijuice Hat Temperture is: {battery_tempeture}°C  \nTempeture in debugging: 24°C\n')
 
-if __name__ == '__main__':
-    
-    juice()
-=======
-    export_png(pu, filename=filename)
-    return pu
+
+
 
 def spectro():
     import seabreeze
@@ -210,7 +205,6 @@ def spectro():
         print('='*30)
         sleep(1)
         
-    
 if __name__ == '__main__':
-    spectro()
->>>>>>> ba0c441ef3fdd40f778ce928d24d7bdbd862edf4
+    
+    juice()

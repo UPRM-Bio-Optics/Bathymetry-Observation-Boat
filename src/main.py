@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from dronekit import connect
 from datetime import date
-from time import sleep
+from time import sleep, time
 import os
 #import dronekit_sitl
 import pandas as pd
@@ -19,6 +19,8 @@ from bokeh.io import export_png
 from bokeh.transform import linear_cmap
 from bokeh.palettes import Plasma256 as palette
 from bokeh.layouts import row
+
+from pijuice import PiJuice
 '''
 TODO
 - make scannable variable into function -> boolean
@@ -26,24 +28,22 @@ TODO
 # https://hacks.mozilla.org/2017/02/headless-raspberry-pi-configuration-over-bluetooth/
 
 
-
 def Contour(csvpath: str, threeD=False) -> None:
-    
     """ 
     creates contour plot from topographical data obtained from echosounder
-    
+
 
     Args:
         csvpath (str): path to csv containing data: Lat, Lon, Depth in feet
         threeD (bool, optional): boolean flag to determine which map to make; 2D or 3D. 
             Defaults to False.
     """
-    
+
     df = pd.read_csv(csvpath)
     lat = df.Latitude
     lon = df.Longitude
     topo = df.Depth_in_Feet
-    
+
     if(threeD):
         fig, ax1 = plt.subplots(subplot_kw={"projection": "3d"})
         fileName = "ThreeD Map.png"
@@ -56,9 +56,9 @@ def Contour(csvpath: str, threeD=False) -> None:
     xi = np.linspace(min(lon), max(lon), len(lon))
     yi = np.linspace(min(lat), max(lat), len(lat))
 
-    zi = griddata((lon, lat), 
+    zi = griddata((lon, lat),
                   topo,
-                  (xi[None, :], yi[:, None]), 
+                  (xi[None, :], yi[:, None]),
                   method='linear')
 
     cntr1 = ax1.contourf(xi, yi, zi, levels=30, cmap=cm.coolwarm)
@@ -77,12 +77,11 @@ def Contour(csvpath: str, threeD=False) -> None:
     today = date.today().strftime("%b-%d-%Y")
     plt.savefig(os.getcwd() + '/Data/Graphs/' + today + fileName)
 
-    
     if(threeD):
         return
     Contour(csvpath, threeD=True)
- 
-    
+
+
 def MapOverlay(csvpath: str, zoom=18, map_type='satellite') -> row:
     """ Creates overlay of Depth Data with a map. 
 
@@ -95,14 +94,15 @@ def MapOverlay(csvpath: str, zoom=18, map_type='satellite') -> row:
         row: bokeh row object
     """
     api_key = os.environ['GOOGLE_API_KEY']
-    bokeh_width, bokeh_height = 500,400
-    
+    bokeh_width, bokeh_height = 500, 400
+
     df = pd.read_csv(csvpath)
-    df['radius'] = np.sqrt(df['Depth_in_Feet'])/ (zoom - (zoom - 20)) # wack ass line to test different radius
-        
+    # wack ass line to test different radius
+    df['radius'] = np.sqrt(df['Depth_in_Feet']) / (zoom - (zoom - 20))
+
     lat = np.mean(df.Latitude)
     lon = np.mean(df.Longitude)
-    
+
     gmap_options = GMapOptions(lat=lat, lng=lon,
                                map_type=map_type, zoom=zoom)
     hover = HoverTool(
@@ -118,7 +118,8 @@ def MapOverlay(csvpath: str, zoom=18, map_type='satellite') -> row:
     source = ColumnDataSource(df)
     # defining a color mapper, that will map values of pricem2
     # between 2000 and 8000 on the color palette
-    mapper = linear_cmap('Depth_in_Feet', palette, min(df.Depth_in_Feet), max(df.Depth_in_Feet))
+    mapper = linear_cmap('Depth_in_Feet', palette, min(
+        df.Depth_in_Feet), max(df.Depth_in_Feet))
     # we use the mapper for the color of the circles
     center = p.circle('Longitude', 'Latitude', radius='radius', alpha=0.4,
                       color=mapper, source=source)
@@ -128,26 +129,38 @@ def MapOverlay(csvpath: str, zoom=18, map_type='satellite') -> row:
                          location=(0, 0), label_standoff=12,
                          ticker=LogTicker(), border_line_color=None
                          )
-    
+
     color_bar_title = figure(title='Depth in Feet', title_location='left',
                              height=400,
                              width=200,
-                             toolbar_location=None, min_border=0, 
+                             toolbar_location=None, min_border=0,
                              outline_line_color=None
                              )
-    
-    color_bar_title.add_layout(color_bar, 'left')
-    color_bar_title.title.align="center"
-    color_bar_title.title.text_font_size = '12pt'
- 
-    
 
+    color_bar_title.add_layout(color_bar, 'left')
+    color_bar_title.title.align = "center"
+    color_bar_title.title.text_font_size = '12pt'
 
     pu = row(p, color_bar_title)
     today = date.today().strftime("%b-%d-%Y")
-    filename = os.getcwd() + '/Data/Graphs/'+ today + ' ' +"MapOverlay.png"
+    filename = os.getcwd() + '/Data/Graphs/' + today + ' ' + "MapOverlay.png"
     export_png(pu, filename=filename)
     return pu
+
+
+def batteryStatus() -> None:
+    """ Prints Output of PiJuice Battery Hat Status 
+
+    Args: None
+    """
+    pijuice = PiJuice()
+    battery_level = pijuice.status.GetChargeLevel()['data']
+    battery_status = pijuice.status.GetStatus()['data']
+    battery_tempeture = pijuice.status.GetBatteryTemperature()['data']
+    print(f'\nPiJuice Battery Percentage is: {battery_level}%\n')
+    print(f'The PiJuice Battery Status is: {battery_status}\n')
+    print(
+        f'The Pijuice Hat Temperture is: {battery_tempeture}°C  \nTempeture in debugging: 24°C\n')
 
 
 def isScannable(vehicle, cmds, missionlist) -> bool:
@@ -164,7 +177,6 @@ def isScannable(vehicle, cmds, missionlist) -> bool:
 
 
 def main():
-    
     """
     Main Program to be executed
     """
@@ -213,6 +225,8 @@ def main():
     currentWaypoint = vehicle.commands.next
     # for i in range(50): #stop deleting this
 
+    clock = time()
+
     while scannable:
 
         # Translate NMEA data to sentences
@@ -240,8 +254,6 @@ def main():
             row[0] = nmea_object.latitude
             row[1] = nmea_object.longitude
 
-        print(row)
-
         # Write data to CSV file
         if all(row):
             print('ADDING ROW CSV')
@@ -249,11 +261,16 @@ def main():
             csvfile.flush()    # Save current data to CSV
             row = [None, None, None]
             sleep(0.1)
-        scannable = vehicle.armed #and currentWaypoint <= len(missionlist)
+        # update scannable variable
+        scannable = vehicle.armed  # and currentWaypoint <= len(missionlist)
         #currentWaypoint = vehicle.commands.next
+
+        # print battery status every minute then reset counter
+        if clock - time() > 60:
+            batteryStatus()
+            clock = time()
+
     print('Done with Mission ')
-
-
 
     # Graph CSV data
     try:
