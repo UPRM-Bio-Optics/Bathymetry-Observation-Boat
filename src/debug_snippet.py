@@ -173,7 +173,19 @@ def mapOverlay(csvpath: str, zoom=18, map_type='satellite'):
     export_png(p, filename=filename)
     return p
 # Function to determines if vehicle is armed or not done with missions
+
+def juice():
+    
+    from pijuice import PiJuice 
+    
+    pijuice = PiJuice()
+    battery_level = pijuice.status.GetChargeLevel()['data']
+    battery_status = pijuice.status.GetStatus()['data']
+    battery_tempeture = pijuice.status.GetBatteryTemperature()['data']
+    print(f'\nPiJuice Battery Percentage is: {battery_level}%\n')
+    print(f'The PiJuice Battery Status is: {battery_status}\n')
+    print(f'The Pijuice Hat Temperture is: {battery_tempeture}°C  \nTempeture in debugging: 24°C\n')
+
 if __name__ == '__main__':
-    csvpath = os.getcwd() + '/Data/depth_data/Mar-25-2022.csv'
-    graph(csvpath)
-    mapOverlay(csvpath)
+    
+    juice()

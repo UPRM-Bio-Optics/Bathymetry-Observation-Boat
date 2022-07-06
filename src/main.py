@@ -1,4 +1,4 @@
-
+#!/usr/bin/python3
 import serial
 import pynmea2
 import csv
@@ -184,7 +184,7 @@ def run():
             continue
 
         # Detect and record depth data sentences
-        if nmea_object.sentence_type == 'DBT':
+        if nmea_object.sentence_type == 'DBT' and nmea_object.depth_feet is not None:
 
             print(f'Appending Depth Data {nmea_object.depth_feet}')
             topo = np.append(topo, float(nmea_object.depth_feet))
@@ -209,8 +209,8 @@ def run():
             csvfile.flush()    # Save current data to CSV
             row = [None, None, None]
             sleep(0.1)
-        scannable = vehicle.armed and currentWaypoint <= len(missionlist)
-        currentWaypoint = vehicle.commands.next
+        scannable = vehicle.armed #and currentWaypoint <= len(missionlist)
+        #currentWaypoint = vehicle.commands.next
     print('Done with Mission ')
 
 
