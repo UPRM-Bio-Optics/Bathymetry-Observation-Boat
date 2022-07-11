@@ -19,7 +19,7 @@ from bokeh.io import export_png
 from bokeh.transform import linear_cmap
 from bokeh.palettes import Plasma256 as palette
 from bokeh.layouts import row
-
+from scipy.signal import lfilter
 
 def main():
     lat = np.array([])
@@ -175,7 +175,7 @@ def mapOverlay(csvpath: str, zoom=18, map_type='satellite'):
     filename = os.getcwd() + '/Data/Graphs/'+ today + ' ' +"MapOverlay.png"
     export_png(p, filename=filename)
     return p
-# Function to determines if vehicle is armed or not done with missions
+
 
 def juice():
     
@@ -190,21 +190,31 @@ def juice():
     print(f'The Pijuice Hat Temperture is: {battery_tempeture}°C  \nTempeture in debugging: 24°C\n')
 
 
-
-
+#def reduceNoise(wavelengths : list, intensities : list) -> list:
+    
 def spectro():
     import seabreeze
     seabreeze.use('pyseabreeze')
     from seabreeze.spectrometers import Spectrometer 
     
-    spec = Spectrometer.from_first_available()# Function to determines if vehicle is armed or not done with missions
+    spec = Spectrometer.from_first_available()
     spec.integration_time_micros(100000)
-    for i in range(10):
+    
+    wavelengths, intensities = spec.spectrum()
+    wavelengths = np.round(wavelengths)
+    intensities = np.round(intensities)
+    #reduceNoise(wavelengths=wavelengths, intensities=intensities)
         
-        print(f'Intensities :{spec.intensities()}', f'\n Wavelengths: {spec.wavelengths()}')
-        print('='*30)
-        sleep(1)
         
+    for i in range(len(wavelengths)):
+        
+        print(f'Wavelength : {wavelengths[i]}, Intensity : {intensities[i]}')
+        
+    plt.figure()
+    plt.plot(wavelengths, intensities, '-r')
+    plt.show()
+    
+    
 if __name__ == '__main__':
     
-    juice()
+    spectro()
