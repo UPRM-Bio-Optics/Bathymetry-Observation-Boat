@@ -190,8 +190,19 @@ def juice():
     print(f'The Pijuice Hat Temperture is: {battery_tempeture}°C  \nTempeture in debugging: 24°C\n')
 
 
-#def reduceNoise(wavelengths : list, intensities : list) -> list:
+def reduceNoise(wavelengths : list, intensities : list) -> dict:
     
+    data = {}
+    
+    for i in range(len(wavelengths)):
+        sum = 0
+        while wavelengths[i] in data:
+            sum+=wavelengths[i]
+            i+=1
+            
+        data[wavelengths[i]] = sum / len(wavelengths)
+        
+    return data
 def spectro():
     import seabreeze
     seabreeze.use('pyseabreeze')
@@ -203,7 +214,7 @@ def spectro():
     wavelengths, intensities = spec.spectrum()
     wavelengths = np.round(wavelengths)
     intensities = np.round(intensities)
-    #reduceNoise(wavelengths=wavelengths, intensities=intensities)
+    result = reduceNoise(wavelengths=wavelengths, intensities=intensities)
         
         
     for i in range(len(wavelengths)):
