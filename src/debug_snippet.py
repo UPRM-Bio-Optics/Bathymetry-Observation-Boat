@@ -1,4 +1,5 @@
 
+import wave
 import serial
 import pynmea2
 import csv
@@ -193,16 +194,28 @@ def juice():
 def reduceNoise(wavelengths : list, intensities : list) -> dict:
     
     data = {}
-    
+    sum = 0
+    sumflag = False
+    count = 1
     for i in range(len(wavelengths)):
-        sum = 0
-        while wavelengths[i] in data:
-            sum+=wavelengths[i]
-            i+=1
+
+        if wavelengths[i] in data:
+            sum+= intensities[i]
+            sumflag = True
+            count+=1
+        elif sumflag:
+            data[wavelengths[i - 1]] = sum / count
+            sumflag = False
+            count = 1
+            data[wavelengths[i]] = intensities[i]
+            sum = intensities[i]
+        else:
+            data[wavelengths[i]] = intensities[i]
+            sum = intensities[i]
             
-        data[wavelengths[i]] = sum / len(wavelengths)
-        
-    return data
+    return list(data.keys()), list(data.values())
+
+
 def spectro():
     import seabreeze
     seabreeze.use('pyseabreeze')
@@ -210,20 +223,33 @@ def spectro():
     
     spec = Spectrometer.from_first_available()
     spec.integration_time_micros(100000)
-    
+
     wavelengths, intensities = spec.spectrum()
     wavelengths = np.round(wavelengths)
     intensities = np.round(intensities)
-    result = reduceNoise(wavelengths=wavelengths, intensities=intensities)
+    
+    wavelengths,intensities  = reduceNoise(wavelengths=wavelengths, intensities=intensities)
+
+    
+    today = date.today().strftime("%b-%d-%Y")    
+    csvfile = open(os.getcwd() + '/Data/Spectrometer/csv/' + today + '.csv', 'w')
+    writer = csv.writer(csvfile)
+    _header = ['Wavelengths (nm)', 'Intensities (a.u)']
+    writer.writerow(_header)   
+    
+    for i in range (len(wavelengths)):
+        wavelength = wavelengths[i]
+        intensity = intensities[i]
+        row = [wavelength, intensity]
+        writer.writerow(row)
         
-        
-    for i in range(len(wavelengths)):
-        
-        print(f'Wavelength : {wavelengths[i]}, Intensity : {intensities[i]}')
-        
+    
     plt.figure()
-    plt.plot(wavelengths, intensities, '-r')
-    plt.show()
+    plt.xlabel("Wavelengths(nm)")
+    plt.ylabel("Intensities(a.u)" )
+    plt.title("Spectrometer Data")
+    plt.plot(wavelengths, intensities, '-m')
+    plt.savefig(os.getcwd() + '/Data/Spectrometer/plots/' + today + '.png')
     
     
 if __name__ == '__main__':
