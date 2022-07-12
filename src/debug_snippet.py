@@ -191,8 +191,17 @@ def juice():
     print(f'The Pijuice Hat Temperture is: {battery_tempeture}°C  \nTempeture in debugging: 24°C\n')
 
 
-def reduceNoise(wavelengths : list, intensities : list) -> dict:
+def reduceNoise(wavelengths : list, intensities : list) -> list:
+    """ Removes duplicates from wavelengths list and condenses them to a single entry with 
+    the average of the associated intensities
     
+    Args:
+        wavelengths (list): list of wavelengths spectrum
+        intensities (list): list of intensities spectrum
+    Returns:
+        wavelengths (list): list of wavelengths spectrum with unique entries
+        intensities (list): list of intensities spectrum with unique entries
+    """
     data = {}
     sum = 0
     sumflag = False
