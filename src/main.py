@@ -20,6 +20,7 @@ from bokeh.transform import linear_cmap
 from bokeh.palettes import Plasma256 as palette
 from bokeh.layouts import row
 
+#lib only available in rpi
 from pijuice import PiJuice
 '''
 TODO
@@ -224,7 +225,7 @@ def main() -> None:
     # for i in range(50): #stop deleting this
 
     clock = time()
-
+    #run loop for as long as the boat is in the water
     while scannable:
 
         # Translate NMEA data to sentences
