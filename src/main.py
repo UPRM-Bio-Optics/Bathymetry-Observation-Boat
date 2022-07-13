@@ -25,8 +25,6 @@ from pijuice import PiJuice
 TODO
 - make scannable variable into function -> boolean
 '''
-# https://hacks.mozilla.org/2017/02/headless-raspberry-pi-configuration-over-bluetooth/
-
 
 def Contour(csvpath: str, threeD=False) -> None:
     """ 
@@ -176,7 +174,7 @@ def isScannable(vehicle, cmds, missionlist) -> bool:
     return vehicle.armed or cmds.next <= len(missionlist)
 
 
-def main():
+def main() -> None:
     """
     Main Program to be executed
     """

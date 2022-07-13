@@ -18,8 +18,8 @@ from bokeh.layouts import row
 
 # Constants
 ROOT_DIR = os.path.abspath(os.curdir)
-GRAPHS_DIR = ROOT_DIR+'\\Data\\Graphs'
-CSV_DIR = ROOT_DIR+'\\Data\\depth_data'
+GRAPHS_DIR = ROOT_DIR+'/Data/Graphs'
+CSV_DIR = ROOT_DIR+'/Data/depth_data'
 
 def showGraphsMenu():
 
@@ -158,7 +158,7 @@ def showCSVgraph():
                     Contour(filename)
                     window.close()
 
-                except:
+                except Exception as err:
 
                     errorWindow('Could not parse file')
                     continue

@@ -95,8 +95,8 @@ def main():
     window.refresh()
 
     # Display correct resolution
-    if int(platform.release()) >= 8:
-        ctypes.windll.shcore.SetProcessDpiAwareness(True)
+    #if int(platform.release()) >= 8:
+        #*args, **kwargsctypes.windll.shcore.SetProcessDpiAwareness(True)
 
     # Create an event loop
     while True:
