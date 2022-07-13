@@ -1,4 +1,5 @@
 
+import wave
 import serial
 import pynmea2
 import csv
@@ -19,7 +20,7 @@ from bokeh.io import export_png
 from bokeh.transform import linear_cmap
 from bokeh.palettes import Plasma256 as palette
 from bokeh.layouts import row
-
+from scipy.signal import lfilter
 
 def main():
     lat = np.array([])
@@ -175,7 +176,7 @@ def mapOverlay(csvpath: str, zoom=18, map_type='satellite'):
     filename = os.getcwd() + '/Data/Graphs/'+ today + ' ' +"MapOverlay.png"
     export_png(p, filename=filename)
     return p
-# Function to determines if vehicle is armed or not done with missions
+
 
 def juice():
     
@@ -190,6 +191,38 @@ def juice():
     print(f'The Pijuice Hat Temperture is: {battery_tempeture}°C  \nTempeture in debugging: 24°C\n')
 
 
+def reduceNoise(wavelengths : list, intensities : list) -> list:
+    """ Removes duplicates from wavelengths list and condenses them to a single entry with 
+    the average of the associated intensities
+    
+    Args:
+        wavelengths (list): list of wavelengths spectrum
+        intensities (list): list of intensities spectrum
+    Returns:
+        wavelengths (list): list of wavelengths spectrum with unique entries
+        intensities (list): list of intensities spectrum with unique entries
+    """
+    data = {}
+    sum = 0
+    sumflag = False
+    count = 1
+    for i in range(len(wavelengths)):
+
+        if wavelengths[i] in data:
+            sum+= intensities[i]
+            sumflag = True
+            count+=1
+        elif sumflag:
+            data[wavelengths[i - 1]] = sum / count
+            sumflag = False
+            count = 1
+            data[wavelengths[i]] = intensities[i]
+            sum = intensities[i]
+        else:
+            data[wavelengths[i]] = intensities[i]
+            sum = intensities[i]
+            
+    return list(data.keys()), list(data.values())
 
 
 def spectro():
@@ -197,14 +230,37 @@ def spectro():
     seabreeze.use('pyseabreeze')
     from seabreeze.spectrometers import Spectrometer 
     
-    spec = Spectrometer.from_first_available()# Function to determines if vehicle is armed or not done with missions
+    spec = Spectrometer.from_first_available()
     spec.integration_time_micros(100000)
-    for i in range(10):
+
+    wavelengths, intensities = spec.spectrum()
+    wavelengths = np.round(wavelengths)
+    intensities = np.round(intensities)
+    
+    wavelengths,intensities  = reduceNoise(wavelengths=wavelengths, intensities=intensities)
+
+    
+    today = date.today().strftime("%b-%d-%Y")    
+    csvfile = open(os.getcwd() + '/Data/Spectrometer/csv/' + today + '.csv', 'w')
+    writer = csv.writer(csvfile)
+    _header = ['Wavelengths (nm)', 'Intensities (a.u)']
+    writer.writerow(_header)   
+    
+    for i in range (len(wavelengths)):
+        wavelength = wavelengths[i]
+        intensity = intensities[i]
+        row = [wavelength, intensity]
+        writer.writerow(row)
         
-        print(f'Intensities :{spec.intensities()}', f'\n Wavelengths: {spec.wavelengths()}')
-        print('='*30)
-        sleep(1)
-        
+    
+    plt.figure()
+    plt.xlabel("Wavelengths(nm)")
+    plt.ylabel("Intensities(a.u)" )
+    plt.title("Spectrometer Data")
+    plt.plot(wavelengths, intensities, '-m')
+    plt.savefig(os.getcwd() + '/Data/Spectrometer/plots/' + today + '.png')
+    
+    
 if __name__ == '__main__':
     
-    juice()
+    spectro()
