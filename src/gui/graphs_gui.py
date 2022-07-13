@@ -32,16 +32,25 @@ def showGraphsMenu():
             gui.FolderBrowse(initial_folder=GRAPHS_DIR),
         ],
         [
-            gui.Listbox(values=os.listdir(GRAPHS_DIR), size=(
-                65, 100), enable_events=True, key="-FILE LIST-")
+            gui.Listbox(
+                values=os.listdir(GRAPHS_DIR), 
+                size=(65, 100), 
+                enable_events=True, 
+                key="-FILE LIST-")
         ]
     ]
 
     # For now will only show the name of the file that was chosen
     image_viewer_column = [
         [gui.Text("Choose a graph from the list on the left",
-                  size=(200,), justification='center', key="-TOUT-")],
-        [gui.Image(expand_x='true', key="-IMAGE-")],
+                    size=(200,), 
+                    justification='center', 
+                    key="-TOUT-")],
+        [gui.Image(
+            expand_x='true',
+            size=(200, 200),  
+            key="-IMAGE-"
+            )],
     ]
 
     # ----- Full layout -----
@@ -53,8 +62,13 @@ def showGraphsMenu():
         ]
     ]
 
-    window = gui.Window(title="Graph Viewer", layout=layout,
-                        size=(1900, 1000), relative_location=(0, -32))
+    window = gui.Window(
+        title="Graph Viewer", 
+        layout=layout,
+        size=(1200, 900), 
+        relative_location=(0, 100),
+        resizable=True,
+        )
 
     # Run the Event Loop
     while True:
