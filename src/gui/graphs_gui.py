@@ -1,6 +1,7 @@
 # Dependencies
 import PySimpleGUI as gui
 import os.path
+import os
 import pandas
 import numpy
 import matplotlib.pyplot as pyplot
@@ -18,8 +19,8 @@ from bokeh.layouts import row
 
 # Constants
 ROOT_DIR = os.path.abspath(os.curdir)
-GRAPHS_DIR = ROOT_DIR+'/Data/Graphs'
-CSV_DIR = ROOT_DIR+'/Data/depth_data'
+GRAPHS_DIR = os.sep.join([ROOT_DIR , "Data","Graphs"])
+CSV_DIR = os.sep.join([ROOT_DIR , "Data", "depth_data"])
 
 def showGraphsMenu():
 
@@ -224,7 +225,7 @@ def Contour(csvpath: str, threeD=False):
     ax1.set_ylabel('Longitude', fontsize=20)
 
     today = date.today().strftime("%b-%d-%Y")
-    pyplot.savefig(os.getcwd() + '/Data/Graphs/' + today + fileName)
+    pyplot.savefig(os.sep.join([os.getcwd() + "Data", "Graphs", today + fileName]))
 
     if(threeD):
         return
@@ -282,7 +283,7 @@ def MapOverlay(csvpath: str, zoom=18, map_type='satellite'):
 
     pu = row(p, color_bar_title)
     today = date.today().strftime("%b-%d-%Y")
-    filename = os.getcwd() + '/Data/Graphs/' + today + ' ' + "MapOverlay.png"
+    filename = os.sep.join([os.getcwd(),  "Data", "Graphs",   today + ' ' + "MapOverlay.png"])
     export_png(pu, filename=filename)
 
 

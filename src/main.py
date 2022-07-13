@@ -74,7 +74,7 @@ def Contour(csvpath: str, threeD=False) -> None:
     ax1.set_ylabel('Longitude', fontsize=20)
 
     today = date.today().strftime("%b-%d-%Y")
-    plt.savefig(os.getcwd() + '/Data/Graphs/' + today + fileName)
+    plt.savefig(os.sep.join([os.getcwd(),"Data","Graphs",today + fileName]))
 
     if(threeD):
         return
@@ -142,7 +142,7 @@ def MapOverlay(csvpath: str, zoom=18, map_type='satellite') -> row:
 
     pu = row(p, color_bar_title)
     today = date.today().strftime("%b-%d-%Y")
-    filename = os.getcwd() + '/Data/Graphs/' + today + ' ' + "MapOverlay.png"
+    filename = os.sep.join([os.getcwd(),"Data","Graphs",today + "MapOverlay.png"])
     export_png(pu, filename=filename)
     return pu
 

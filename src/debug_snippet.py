@@ -262,5 +262,4 @@ def spectro():
     
     
 if __name__ == '__main__':
-    
-    spectro()
+    print(os.getcwd())
