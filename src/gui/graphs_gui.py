@@ -225,7 +225,7 @@ def Contour(csvpath: str, threeD=False):
     ax1.set_ylabel('Longitude', fontsize=20)
 
     today = date.today().strftime("%b-%d-%Y")
-    pyplot.savefig(os.sep.join([os.getcwd() + "Data", "Graphs", today + fileName]))
+    cmd = pyplot.savefig(os.sep.join([os.getcwd(), "Data", "Graphs", today + fileName]))
 
     if(threeD):
         return
