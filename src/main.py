@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+#WARNING:bokeh.io.export:file:///home/pi/NCAS-M/NCAS-UPRM/bokeh8g8he3kx.html 538:2167 "[bokeh]" "could not set initial ranges"
 import serial
 import pynmea2
 import csv
@@ -265,7 +266,7 @@ def main() -> None:
         #currentWaypoint = vehicle.commands.next
 
         # print battery status every minute then reset counter
-        if clock - time() > 60:
+        if time() - clock  > 30:
             batteryStatus()
             clock = time()
 

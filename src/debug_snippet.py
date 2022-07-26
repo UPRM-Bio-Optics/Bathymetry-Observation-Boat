@@ -182,7 +182,7 @@ def juice():
     
     from pijuice import PiJuice 
     
-    pijuice = PiJuice()
+    pijuice = PiJuice(1,0x14)
     battery_level = pijuice.status.GetChargeLevel()['data']
     battery_status = pijuice.status.GetStatus()['data']
     battery_tempeture = pijuice.status.GetBatteryTemperature()['data']
@@ -263,4 +263,4 @@ def spectro():
     
 if __name__ == '__main__':
     
-    spectro()
+    juice()
