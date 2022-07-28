@@ -16,7 +16,7 @@ import pandas as pd
 
 from bokeh.plotting import gmap, figure
 from bokeh.models import GMapOptions, HoverTool, LogTicker, ColorBar, ColumnDataSource
-from bokeh.io import export_png
+from bokeh.io import export_png, show
 from bokeh.transform import linear_cmap
 from bokeh.palettes import Plasma256 as palette
 from bokeh.layouts import row
@@ -46,10 +46,10 @@ def Contour(csvpath: str, threeD=False) -> None:
 
     if(threeD):
         fig, ax1 = plt.subplots(subplot_kw={"projection": "3d"})
-        fileName = "ThreeD Map.png"
+        fileName = " ThreeD Map.png"
     else:
         fig, ax1 = plt.subplots()
-        fileName = "TwoD Map.png"
+        fileName = " TwoD Map.png"
 
     fig.set_figheight(10)
     fig.set_figwidth(15)
@@ -98,7 +98,7 @@ def MapOverlay(csvpath: str, zoom=18, map_type='satellite') -> row:
 
     df = pd.read_csv(csvpath)
     # wack ass line to test different radius
-    df['radius'] = np.sqrt(df['Depth_in_Feet']) / (zoom - (zoom - 20))
+    df['radius'] = np.sqrt(df['Depth_in_Feet']) / 0.8
 
     lat = np.mean(df.Latitude)
     lon = np.mean(df.Longitude)
@@ -143,7 +143,8 @@ def MapOverlay(csvpath: str, zoom=18, map_type='satellite') -> row:
 
     pu = row(p, color_bar_title)
     today = date.today().strftime("%b-%d-%Y")
-    filename = os.sep.join([os.getcwd(),"Data","Graphs",today + "MapOverlay.png"])
+    filename = os.sep.join([os.getcwd(),"Data","Graphs",today + " MapOverlay.png"])
+    
     export_png(pu, filename=filename)
     return pu
 

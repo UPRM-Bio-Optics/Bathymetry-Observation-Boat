@@ -16,7 +16,7 @@ import pandas as pd
 from time import sleep
 from bokeh.plotting import gmap, figure
 from bokeh.models import GMapOptions, HoverTool, LogTicker, ColorBar, ColumnDataSource
-from bokeh.io import export_png
+from bokeh.io import export_png, show
 from bokeh.transform import linear_cmap
 from bokeh.palettes import Plasma256 as palette
 from bokeh.layouts import row
@@ -120,62 +120,6 @@ def graph(csvpath: str, threeD=False) -> None:
     graph(csvpath, threeD=True)
     
     
-def mapOverlay(csvpath: str, zoom=18, map_type='satellite'):
-    
-    api_key = os.environ['GOOGLE_API_KEY']
-    bokeh_width, bokeh_height = 500,400
-    
-    df = pd.read_csv(csvpath)
-    df['radius'] = np.sqrt(df['Depth_in_Feet'])/0.8
-        
-    lat = np.mean(df.Latitude)
-    lon = np.mean(df.Longitude)
-    
-    gmap_options = GMapOptions(lat=lat, lng=lon,
-                               map_type=map_type, zoom=zoom)
-    hover = HoverTool(
-        tooltips=[
-            ('Depth in Feet', '@Depth_in_Feet '),
-            # the {0.} means that we don't want decimals
-            # for 1 decimal, write {0.0}
-        ]
-    )
-    p = gmap(api_key, gmap_options, title='Bathymetry Map Parguera',
-             width=bokeh_width, height=bokeh_height,
-             tools=[hover, 'reset', 'wheel_zoom', 'pan'])
-    source = ColumnDataSource(df)
-    # defining a color mapper, that will map values of pricem2
-    # between 2000 and 8000 on the color palette
-    mapper = linear_cmap('Depth_in_Feet', palette, min(df.Depth_in_Feet), max(df.Depth_in_Feet))
-    # we use the mapper for the color of the circles
-    center = p.circle('Longitude', 'Latitude', radius='radius', alpha=0.4,
-                      color=mapper, source=source)
-    # and we add a color scale to see which values the colors
-    # correspond to
-    color_bar = ColorBar(color_mapper=mapper['transform'],
-                         location=(0, 0), label_standoff=12,
-                         ticker=LogTicker(), border_line_color=None
-                         )
-    
-    color_bar_title = figure(title='Depth in Feet', title_location='left',
-                             height=400,
-                             width=200,
-                             toolbar_location=None, min_border=0, 
-                             outline_line_color=None
-                             )
-    
-    color_bar_title.add_layout(color_bar, 'left')
-    color_bar_title.title.align="center"
-    color_bar_title.title.text_font_size = '12pt'
- 
-    
-
-
-    pu = row(p, color_bar_title)
-    today = date.today().strftime("%b-%d-%Y")
-    filename = os.getcwd() + '/Data/Graphs/'+ today + ' ' +"MapOverlay.png"
-    export_png(p, filename=filename)
-    return p
 
 
 def juice():
@@ -260,7 +204,71 @@ def spectro():
     plt.plot(wavelengths, intensities, '-m')
     plt.savefig(os.getcwd() + '/Data/Spectrometer/plots/' + today + '.png')
     
-    
+def MapOverlay(csvpath: str, zoom=18, map_type='satellite') -> row:
+    """ Creates overlay of Depth Data with a map. 
+
+    Args:
+        csvpath (str): Path to csv containing data: Lat, Lon, Depth in feet
+        zoom (int, optional):  Defaults to 18.
+        map_type (str, optional): type of google map. Defaults to 'satellite'.
+
+    Returns:
+        row: bokeh row object
+    """
+    api_key = os.environ['GOOGLE_API_KEY']
+    bokeh_width, bokeh_height = 500, 400
+
+    df = pd.read_csv(csvpath)
+    # wack ass line to test different radius
+    df['radius'] = np.sqrt(df['Depth_in_Feet']) / 0.8
+
+    lat = np.mean(df.Latitude)
+    lon = np.mean(df.Longitude)
+
+    gmap_options = GMapOptions(lat=lat, lng=lon,
+                               map_type=map_type, zoom=zoom)
+    hover = HoverTool(
+        tooltips=[
+            ('Depth in Feet', '@Depth_in_Feet '),
+            # the {0.} means that we don't want decimals
+            # for 1 decimal, write {0.0}
+        ]
+    )
+    p = gmap(api_key, gmap_options, title='Bathymetry Map Parguera',
+             width=bokeh_width, height=bokeh_height,
+             tools=[hover, 'reset', 'wheel_zoom', 'pan'])
+    source = ColumnDataSource(df)
+    # defining a color mapper, that will map values of pricem2
+    # between 2000 and 8000 on the color palette
+    mapper = linear_cmap('Depth_in_Feet', palette, min(
+        df.Depth_in_Feet), max(df.Depth_in_Feet))
+    # we use the mapper for the color of the circles
+    center = p.circle('Longitude', 'Latitude', radius = 'radius', alpha=0.4,
+                      color=mapper, source=source)
+    # and we add a color scale to see which values the colors
+    # correspond to
+    color_bar = ColorBar(color_mapper=mapper['transform'],
+                         location=(0, 0), label_standoff=12,
+                         ticker=LogTicker(), border_line_color=None
+                         )
+
+    color_bar_title = figure(title='Depth in Feet', title_location='left',
+                             height=400,
+                             width=200,
+                             toolbar_location=None, min_border=0,
+                             outline_line_color=None
+                             )
+
+    color_bar_title.add_layout(color_bar, 'left')
+    color_bar_title.title.align = "center"
+    color_bar_title.title.text_font_size = '12pt'
+
+    pu = row(p, color_bar_title)
+    today = date.today().strftime("%b-%d-%Y")
+    filename = os.sep.join([os.getcwd(),"Data","Graphs",today + " MapOverlay.png"])
+    show(pu)
+    export_png(pu, filename=filename)
+    return pu  
 if __name__ == '__main__':
     
-    juice()
+    MapOverlay("/home/alonso/Coding/NCAS/NCAS-UPRM/Data/depth_data/Jul-26-2022.csv")
