@@ -1,4 +1,4 @@
-# NCAS-M UPRM
+# Bio-Optics UPRM Research Project
 
 University of Puerto Rico's Bio-Optical Oceanography Laboratory undergraduate research project.
 
