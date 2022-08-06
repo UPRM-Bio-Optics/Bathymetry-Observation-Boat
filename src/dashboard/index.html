@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOPHS</title>
+    <link rel="stylesheet" href="style.css">
+
+    <script src="./assets/lib/d3.js"></script>
+    <script src="./assets/lib/jquery.js"></script>
+    <script src="./assets/lib/plotly.js"></script>
+
+</head>
+<body>
+    <div class="banner">
+        <div class="logo">
+            Hydronautical Observation Platform for Hydrographic Sounding
+        </div>
+    </div>
+    <div class="heading"><h1>Data Visualization</h1></div>
+    <div class="app-container">
+        <div class="details-container">
+            <div class="container-heading">
+                <h2>Visualization Details</h2>
+            </div>
+            <div class="detail">
+                <h3>File:</h3>
+                <select name="files" id="files"></select>
+            </div>
+            <div class="detail">
+                <h3>Visualization:</h3>
+                <input type="radio" name="visualization" id="plot" checked>
+                <label for="map">2D Plot</label>
+                <br>
+                <input type="radio" name="visualization" id="surface">
+                <label for="surface">3D Surface Plot</label>
+                <br>
+                <input type="radio" name="visualization" id="map">
+                <label for="map">Map Overlay</label>
+            </div>
+
+            <div class="confirm-button">
+                <button onclick="graph()">Confirm</button>
+            </div>
+            
+        </div>
+        <div class="plot-container">
+            <div class="container-heading"><h2>Graph</h2></div>
+            <div class="plot" id="plot-div"></div>
+        </div>
+    </div>
+    <script src="app.js" defer></script>
+</body>
+</html>
