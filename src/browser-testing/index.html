@@ -1,58 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HOPHS</title>
-    <link rel="stylesheet" href="style.css">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>HOPHS</title>
+		<link rel="stylesheet" href="style.css" />
 
-    <script src="./assets/lib/d3.js"></script>
-    <script src="./assets/lib/jquery.js"></script>
-    <script src="./assets/lib/plotly.js"></script>
+		<script src="./assets/lib/d3.js"></script>
+		<script src="./assets/lib/jquery.js"></script>
+		<script src="./assets/lib/plotly.js"></script>
+	</head>
+	<body>
+		<div class="banner">
+			<div class="logo">
+				Hydronautical Observation Platform for Hydrographic Sounding
+			</div>
+		</div>
+		<div class="heading"><h1>Data Visualization</h1></div>
+		<div class="app-container">
+			<div class="details-container">
+				<div class="container-heading">
+					<h2>Visualization Details</h2>
+				</div>
+				<div class="detail">
+					<h3>File:</h3>
+					<select name="files" id="files"></select>
+				</div>
+				<div class="detail">
+					<h3>Visualization:</h3>
+					<input type="radio" name="visualization" id="contour" checked />
+					<label for="map">Contour Plot</label>
+					<br />
+					<input type="radio" name="visualization" id="surface" />
+					<label for="surface">Surface Plot</label>
+					<br />
+					<input type="radio" name="visualization" id="mesh" />
+					<label for="mesh">3D Mesh</label>
+					<br />
+					<input type="radio" name="visualization" id="map" />
+					<label for="map">Map Overlay</label>
+				</div>
 
-</head>
-<body>
-    <div class="banner">
-        <div class="logo">
-            Hydronautical Observation Platform for Hydrographic Sounding
-        </div>
-    </div>
-    <div class="heading"><h1>Data Visualization</h1></div>
-    <div class="app-container">
-        <div class="details-container">
-            <div class="container-heading">
-                <h2>Visualization Details</h2>
-            </div>
-            <div class="detail">
-                <h3>File:</h3>
-                <select name="files" id="files"></select>
-            </div>
-            <div class="detail">
-                <h3>Visualization:</h3>
-                <input type="radio" name="visualization" id="contour" checked>
-                <label for="map">Contour Plot</label>
-                <br>
-                <input type="radio" name="visualization" id="surface">
-                <label for="surface">Surface Plot</label>
-                <br>
-                <input type="radio" name="visualization" id="map">
-                <label for="map">Map Overlay</label>
-            </div>
-
-            <div class="confirm-button">
-                <button onclick="graph()">Confirm</button>
-            </div>
-            
-        </div>
-        <div class="graph-container">
-            <div class="container-heading">
-                <h2 id="graph-heading">Graph</h2>
-            </div>
-            <div class="loader"></div>
-            <div id="plot-div"></div>
-        </div>
-    </div>
-    <script src="app.js" defer></script>
-</body>
+				<div class="confirm-button">
+					<button onclick="graph()">Confirm</button>
+				</div>
+			</div>
+			<div class="graph-container">
+				<div class="container-heading">
+					<h2 id="graph-heading">Graph</h2>
+				</div>
+				<div class="loader"></div>
+				<div id="plot-div"></div>
+			</div>
+		</div>
+		<script src="app.js" defer></script>
+	</body>
 </html>
