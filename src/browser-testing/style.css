@@ -28,6 +28,10 @@ button:hover {
     cursor: pointer;
 }
 
+button:active {
+    cursor: wait;
+}
+
 .banner {
     background: url(./assets/img/ocean.png);
     position: absolute;
@@ -62,8 +66,9 @@ button:hover {
 .app-container {
     margin: 30px;
     width: calc(100% - 60px);
-    height: 800px;
+    height: 100%;
     display: flex;
+    /* border: 2px solid black; */
 }
 
 .details-container {
@@ -90,7 +95,7 @@ button:hover {
     text-align: center;
 }
 
-.plot-container {
+.graph-container {
     padding: 20px;
     width: calc(90% - 20px);
     height: 100%;
