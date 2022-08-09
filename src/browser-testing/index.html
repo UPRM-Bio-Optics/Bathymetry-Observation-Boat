@@ -29,13 +29,13 @@
 				</div>
 				<div class="detail">
 					<h3>Visualization:</h3>
-					<input type="radio" name="visualization" id="contour" checked />
+					<input type="radio" name="visualization" id="contour" />
 					<label for="map">Contour Plot</label>
 					<br />
-					<input type="radio" name="visualization" id="surface" />
+					<!-- <input type="radio" name="visualization" id="surface" />
 					<label for="surface">Surface Plot</label>
-					<br />
-					<input type="radio" name="visualization" id="mesh" />
+					<br /> -->
+					<input type="radio" name="visualization" id="mesh" checked />
 					<label for="mesh">3D Mesh</label>
 					<br />
 					<input type="radio" name="visualization" id="map" />
@@ -51,7 +51,7 @@
 					<h2 id="graph-heading">Graph</h2>
 				</div>
 				<div class="loader"></div>
-				<div id="plot-div"></div>
+				<div class="graph" id="plot-div"></div>
 			</div>
 		</div>
 		<script src="app.js" defer></script>

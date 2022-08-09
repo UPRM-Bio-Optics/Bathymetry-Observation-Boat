@@ -12,6 +12,12 @@ var y_data;
 var z_data;
 var surface_data;
 
+var colorscale = [
+	[0, "rgb(220, 220, 255)"],
+	[0.5, "rgb(100, 100, 255)"],
+	[1, "rgb(0, 0, 100)"],
+];
+
 graph();
 
 async function graph() {
@@ -71,19 +77,29 @@ async function getData() {
 			}
 		})
 		.then(() => {
-			console.log(csv_data);
-			console.log(x_data);
-			console.log(y_data);
-			console.log(z_data);
-
 			for (value in z_data) {
-				surface_data.push(z_data);
-				// var temp = []
-				// for (row in z_data){
-				//     temp.push(z_data[value])
+				var temp = [];
+				for (index in z_data) {
+					if (index == value) {
+						temp.push(z_data[value]);
+					} else {
+						// temp.push(0);
+						temp.push(0);
+					}
+				}
+				// for (var i = 0; i < value; i++) {
+				// 	var newFirst = temp.shift();
+				// 	temp.push(newFirst);
 				// }
-				// surface_data.push(temp)
+				surface_data.push(temp);
 			}
+		})
+		.then(() => {
+			console.log("CSV Data:", csv_data);
+			console.log("X Data:", x_data);
+			console.log("Y Data:", y_data);
+			console.log("Z Data:", z_data);
+			console.log("Surface Data:", surface_data);
 		});
 }
 
@@ -96,13 +112,15 @@ function contourPlot() {
 			y: y_data,
 			z: z_data,
 			type: "contour",
-			// contours: {
-			//     coloring: 'heatmap'
-			// },
+			contours: {
+				coloring: "heatmap",
+			},
+			// ncontours: Math.max(...z_data),
 			colorbar: {
 				title: "Depth (ft)",
 				titleside: "right",
 			},
+			colorscale: colorscale,
 		},
 	];
 
@@ -123,22 +141,19 @@ function contourPlot() {
 function surfacePlot() {
 	console.log("Creating surface plot...");
 
-	console.log(surface_data);
-	console.log(Math.max(...z_data));
-
 	var data = [
 		{
-			z: surface_data,
-			type: "surface",
 			x: x_data,
 			y: y_data,
-			// z: z_data,
-			// type: "mesh3d",
+			// z: [z_data, z_data],
+			z: surface_data,
+			type: "surface",
 		},
 	];
 
 	var layout = {
 		autosize: true,
+		// width: "600",
 		height: "600",
 		margin: {
 			l: 0,
@@ -149,13 +164,15 @@ function surfacePlot() {
 		scene: {
 			xaxis: {
 				title: "Longuitud",
+				// range: [Math.min(...x_data), Math.max(...x_data)],
 			},
 			yaxis: {
 				title: "Latitude",
+				// range: [Math.min(...y_data), Math.max(...y_data)],
 			},
 			zaxis: {
 				title: "Depth",
-				// autorange: "reversed",
+				autorange: "reversed",
 				range: [Math.max(...z_data) * 2, 0],
 			},
 		},
@@ -173,7 +190,10 @@ function mesh3d() {
 			x: x_data,
 			y: y_data,
 			type: "mesh3d",
-			opacity: 1.0,
+			// opacity: 1.0,
+
+			intensity: z_data,
+			colorscale: colorscale,
 		},
 	];
 
@@ -197,6 +217,12 @@ function mesh3d() {
 				title: "Depth",
 				autorange: "reversed",
 			},
+			aspectmode: "manual",
+			aspectratio: {
+				x: 1,
+				y: 1,
+				z: 0.5,
+			},
 		},
 	};
 
@@ -212,12 +238,19 @@ function mapOverlay() {
 			lon: x_data,
 			lat: y_data,
 			z: z_data,
+
+			colorscale: colorscale,
 		},
 	];
 
 	var layout = {
 		mapbox: {
 			style: "open-street-map",
+			center: {
+				lon: x_data[0],
+				lat: y_data[0],
+			},
+			zoom: 19,
 		},
 		xaxis: {
 			title: csv_data[1],
