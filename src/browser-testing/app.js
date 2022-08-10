@@ -6,6 +6,13 @@ for (index in files) {
 	$("#files").append(new Option((text = files[index]), (value = files[index])));
 }
 
+function getFiles() {
+	console.log($("#csv-files").val());
+	for (file in $("#csv-files").files) {
+		console.log(file);
+	}
+}
+
 var csv_data;
 var x_data;
 var y_data;
@@ -245,7 +252,16 @@ function mapOverlay() {
 
 	var layout = {
 		mapbox: {
-			style: "open-street-map",
+			style: "white-bg",
+			layers: [
+				{
+					sourcetype: "raster",
+					source: [
+						"https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}",
+					],
+					below: "traces",
+				},
+			],
 			center: {
 				lon: x_data[0],
 				lat: y_data[0],
