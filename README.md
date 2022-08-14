@@ -1,6 +1,6 @@
-# UPRM Bio-Optics Bathymetry
+# Bathymetry Observation Boat (B.O.B.)
 
-## University of Puerto Rico's Bio-Optical Oceanography Laboratory undergraduate research project.
+## UPRM Bio-Optical Oceanography Laboratory undergraduate research project.
 
 #### New website (W.I.P.): https://sites.google.com/view/bio-optics/home
 
