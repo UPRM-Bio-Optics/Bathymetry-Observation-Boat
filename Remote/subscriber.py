@@ -1,5 +1,6 @@
 import paho.mqtt.client as mqtt
 import os
+import time
 '''
 This is the Subscriber and it is used to listen for the ngrok IP published by the RPI on the broker.
 Once it receives the IP it attempts to connect via ssh
@@ -15,9 +16,10 @@ def on_message(client, userdata, msg):
     
     print("Yes!")
     print(msg.payload.decode())
-    ip = msg.rsplit("//")[-1]
+    ip = msg.payload.decode().rsplit("//")[-1]
+    ip, port = ip.rsplit(":")
     try:
-        os.system(f"ssh root@{ip}")
+        os.system(f"ssh root@{ip} -p {port}")
     except Exception as err:
         print(err)
     client.disconnect()
