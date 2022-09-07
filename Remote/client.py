@@ -8,7 +8,7 @@ import paho.mqtt.client as mqtt
 def  getNgrok():
     
 #    subprocess.Popen(["ngrok","tcp", "22"],
- #		     stdout=subprocess.PIPE)
+#		     stdout=subprocess.PIPE)
     
     time.sleep(3) # to allow the ngrok to fetch the url from the server
     localhost_url = "http://localhost:4040/api/tunnels" #Url with tunnel details

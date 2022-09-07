@@ -1,5 +1,5 @@
 import paho.mqtt.client as mqtt
-
+import os 
 # This is the Subscriber
 
 def on_connect(client, userdata, flags, rc):
@@ -9,6 +9,8 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     print("Yes!")
     print(msg.payload.decode())
+    ip = msg.rsplit("//")[-1]
+    os.system(f"ssh root@{ip}")
     client.disconnect()
     
 client = mqtt.Client()
