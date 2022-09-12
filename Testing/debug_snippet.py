@@ -204,7 +204,7 @@ def spectro():
     plt.plot(wavelengths, intensities, '-m')
     plt.savefig(os.getcwd() + '/Data/Spectrometer/plots/' + today + '.png')
     
-def MapOverlay(csvpath: str, zoom=18, map_type='satellite') -> row:
+def MapOverlay(csvpath: str, zoom=14, map_type='satellite') -> row:
     """ Creates overlay of Depth Data with a map. 
 
     Args:
@@ -220,7 +220,7 @@ def MapOverlay(csvpath: str, zoom=18, map_type='satellite') -> row:
 
     df = pd.read_csv(csvpath)
     # wack ass line to test different radius
-    df['radius'] = np.sqrt(df['Depth_in_Feet']) / 0.8
+    df['radius'] = np.sqrt(df['Depth_in_Feet']) / 0.3
 
     lat = np.mean(df.Latitude)
     lon = np.mean(df.Longitude)
@@ -271,4 +271,4 @@ def MapOverlay(csvpath: str, zoom=18, map_type='satellite') -> row:
     return pu  
 if __name__ == '__main__':
     
-    MapOverlay("/home/alonso/Coding/NCAS/NCAS-UPRM/Data/depth_data/Jul-26-2022.csv")
+    MapOverlay("C:\\Users\\dasus\\Documents\\NCAS-M\\NCAS\\Data\\depth_data\\Aug-24-2022.csv")

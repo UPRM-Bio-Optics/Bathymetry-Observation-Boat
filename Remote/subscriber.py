@@ -15,7 +15,7 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     
     print("Yes!")
-    print(msg.payload.decode())
+    print(f"connected to {msg.payload.decode()}")
     ip = msg.payload.decode().rsplit("//")[-1]
     ip, port = ip.rsplit(":")
     try:

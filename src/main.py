@@ -82,7 +82,7 @@ def Contour(csvpath: str, threeD=False) -> None:
     Contour(csvpath, threeD=True)
 
 
-def MapOverlay(csvpath: str, zoom=18, map_type='satellite') -> row:
+def MapOverlay(csvpath: str, zoom=14, map_type='satellite') -> row:
     """ Creates overlay of Depth Data with a map. 
 
     Args:
@@ -98,7 +98,7 @@ def MapOverlay(csvpath: str, zoom=18, map_type='satellite') -> row:
 
     df = pd.read_csv(csvpath)
     # wack ass line to test different radius
-    df['radius'] = np.sqrt(df['Depth_in_Feet']) / 0.8
+    df['radius'] = np.sqrt(df['Depth_in_Feet']) / 0.5
 
     lat = np.mean(df.Latitude)
     lon = np.mean(df.Longitude)
