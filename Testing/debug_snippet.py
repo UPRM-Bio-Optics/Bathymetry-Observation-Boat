@@ -269,7 +269,8 @@ def MapOverlay(csvpath: str, zoom=14, map_type='satellite') -> row:
     show(pu)
     export_png(pu, filename=filename)
     return pu  
+
 if __name__ == '__main__':
     
-   # MapOverlay("C:\\Users\\dasus\\Documents\\NCAS-M\\NCAS\\Data\\depth_data\\Aug-24-2022.csv")
-     juice()
+    graph("/home/alonso/Coding/NCAS/NCAS-UPRM/Data/depth_data/Sep-12-2022.csv")
+    #juice()
