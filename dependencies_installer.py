@@ -1,5 +1,6 @@
-import sys
 import subprocess
+import sys
+
 
 # This script installs the necesarry libraries for the program to run
 # Implement pip as a subprocess:

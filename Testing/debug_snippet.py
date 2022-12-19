@@ -1,26 +1,29 @@
 
-import wave
-import serial
-import pynmea2
+
 import csv
-import numpy as np
-from scipy.interpolate import griddata
-import matplotlib.pyplot as plt
-from matplotlib import cm
+import os
 #from dronekit import connect
 from datetime import date
 from time import sleep
-import os
+
+import matplotlib.pyplot as plt
+import numpy as np
 #import dronekit_sitl
 import pandas as pd
-from time import sleep
-from bokeh.plotting import gmap, figure
-from bokeh.models import GMapOptions, HoverTool, LogTicker, ColorBar, ColumnDataSource
+import pynmea2
+import serial
 from bokeh.io import export_png, show
-from bokeh.transform import linear_cmap
-from bokeh.palettes import Plasma256 as palette
 from bokeh.layouts import row
+from bokeh.models import (ColorBar, ColumnDataSource, GMapOptions, HoverTool,
+                          LogTicker)
+from bokeh.palettes import Plasma256 as palette
+from bokeh.plotting import figure, gmap
+from bokeh.transform import linear_cmap
+from matplotlib import cm
+from plotly import graph_objs as go
+from scipy.interpolate import griddata
 from scipy.signal import lfilter
+
 
 def main():
     lat = np.array([])
@@ -80,7 +83,6 @@ def graph(csvpath: str, threeD=False) -> None:
     lat = df.Latitude
     lon = df.Longitude
     topo = df.Depth_in_Feet
-    
     if(threeD):
         fig, ax1 = plt.subplots(subplot_kw={"projection": "3d"})
         fileName = "ThreeD Map.png"
@@ -98,7 +100,7 @@ def graph(csvpath: str, threeD=False) -> None:
                   (xi[None, :], yi[:, None]), 
                   method='linear')
 
-    cntr1 = ax1.contourf(xi, yi, zi, levels=30, cmap=cm.coolwarm)
+    cntr1 = ax1.contourf(xi, yi, zi, cmap=cm.coolwarm, levels=30 )
     cbar = fig.colorbar(cntr1, ax=ax1)
     cbar.set_label('Depth in Feet', fontsize=20)
 
@@ -113,9 +115,10 @@ def graph(csvpath: str, threeD=False) -> None:
 
     today = date.today().strftime("%b-%d-%Y")
     plt.savefig(os.getcwd() + '/Data/Graphs/'+ today +' '+ fileName)
-
     
     if(threeD):
+        ax1.plot_surface(xi, yi, zi, cmap=cm.coolwarm)
+        plt.show()
         return
     graph(csvpath, threeD=True)
     
@@ -269,6 +272,27 @@ def MapOverlay(csvpath: str, zoom=14, map_type='satellite') -> row:
     show(pu)
     export_png(pu, filename=filename)
     return pu  
-if __name__ == '__main__':
+
+def plotly(csv: str):
+ 
+    df = pd.read_csv(csv)
+    lat = {([df.Latitude])}
+    lon = {([df.Longitude])}
+    topo = {([df.Depth_in_Feet])}
     
-    MapOverlay("C:\\Users\\dasus\\Documents\\NCAS-M\\NCAS\\Data\\depth_data\\Aug-24-2022.csv")
+    xi = np.linspace(min(lon), max(lon), len(lon))
+    yi = np.linspace(min(lat), max(lat), len(lat))
+
+    zi = griddata((lon, lat), 
+                  topo,
+                  (xi[None, :], yi[:, None]), 
+                  method='linear')  
+
+    fig = go.Figure(data=go.Contour(x=lon, y=lat, z=zi, 
+                    colorscale= 'rainbow',
+                    connectgaps=True))
+
+    fig.show()
+
+if __name__ == "__main__": 
+    graph("C:/Users/dasus/Documents/NCAS-M/NCAS/Data/depth_data/Mar-25-2022.csv")
