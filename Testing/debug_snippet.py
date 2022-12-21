@@ -5,11 +5,16 @@ import os
 #from dronekit import connect
 from datetime import date
 from time import sleep
+from typing import Tuple, List, Any
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-from src.utils.graphs import plotlyGraph, MapOverlay
+import sys
+# caution: path[0] is reserved for script path (or '' in REPL)
+sys.path.insert(1, 'C:\\Users\\dasus\\Documents\\NCAS-M\\NCAS\\src\\utils')
+
+from graphs import MapOverlay, plotlyGraph
 #import dronekit_sitl
 
   
@@ -26,7 +31,7 @@ def juice():
     print(f'The Pijuice Hat Temperture is: {battery_tempeture}°C  \nTempeture in debugging: 24°C\n')
 
 
-def reduceNoise(wavelengths : list, intensities : list) -> list:
+def reduceNoise(wavelengths : list, intensities : list) -> tuple[list[Any], list[float | Any]]:
     """ Removes duplicates from wavelengths list and condenses them to a single entry with 
     the average of the associated intensities
     

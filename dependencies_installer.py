@@ -27,7 +27,7 @@ def main():
     subprocess.check_call([sys.executable, '-m', 'pip', 'install',
                         'pandas'])
     subprocess.check_call([sys.executable, '-m', 'pip', 'install',
-                        'bokeh'])    
+                        'plotly'])    
     subprocess.check_call([sys.executable, '-m', 'pip', 'install',
                         'requests'])
     subprocess.check_call([sys.executable, '-m', 'pip', 'install',
