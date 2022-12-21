@@ -36,5 +36,7 @@ def main():
                         'pysimplegui'])  
     subprocess.check_call([sys.executable, '-m', 'pip', 'install',
                         'seabreeze[pyseabreeze]'])
+    subprocess.check_call([sys.executable, '-m', 'pip', 'install',
+                        '-U', 'kaleido'])
 if __name__ == '__main__':
     main()
