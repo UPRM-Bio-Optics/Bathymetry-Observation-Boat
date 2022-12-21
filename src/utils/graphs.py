@@ -138,3 +138,18 @@ def MapOverlay(csvpath: str) -> None:
 
     fig.write_image(image)
     fig.show()
+
+    """ import dash
+    import dash_core_components as dcc
+    import dash_html_components as html
+
+    app = dash.Dash()
+    app.layout = html.Div([
+        dcc.Graph(figure=fig)
+    ])
+
+    app.run_server()  # Turn off reloader if inside Jupyter
+
+if __name__ == '__main__':
+    csvpath = "C:/Users/dasus/Documents/NCAS-M/NCAS/Data/echo_sounder/Mar-25-2022.csv"
+    MapOverlay(csvpath) """
