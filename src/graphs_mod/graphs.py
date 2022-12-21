@@ -98,7 +98,7 @@ def plotlyGraph(csvpath: str):
     plotlyContour3d(csvpath)
 
  
-def MapOverlay(csvpath: str, zoom=14, map_type='satellite') -> None:
+def MapOverlay(csvpath: str) -> None:
     """ Creates overlay heatmap of Depth Data with a map. 
 
     Args:

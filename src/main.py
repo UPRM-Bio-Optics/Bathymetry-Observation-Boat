@@ -10,7 +10,7 @@ import os
 from dronekit import connect
 from datetime import date
 from time import sleep, time
-from graphs_mod.graphs import MapOverlay, Contour
+from graphs_mod.graphs import MapOverlay, plotlyGraph
 
 
 
@@ -151,7 +151,7 @@ def main() -> None:
 
     # Graph CSV data
     try:
-        Contour(csvfile.name)
+        plotlyGraph(csvfile.name)
         MapOverlay(csvfile.name)
 
     except Exception as e:
