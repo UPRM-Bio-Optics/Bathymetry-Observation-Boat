@@ -10,7 +10,7 @@ import os
 from dronekit import connect
 from datetime import date
 from time import sleep, time
-from graphs_mod.graphs import MapOverlay, plotlyGraph
+from utils.graphs import MapOverlay, plotlyGraph
 
 
 

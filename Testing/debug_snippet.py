@@ -9,7 +9,7 @@ from time import sleep
 import matplotlib.pyplot as plt
 import numpy as np
 
-from src.graphs_mod.graphs import plotlyGraph, MapOverlay
+from src.utils.graphs import plotlyGraph, MapOverlay
 #import dronekit_sitl
 
   
