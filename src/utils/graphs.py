@@ -38,11 +38,12 @@ def plotlyContour2d(csvpath: str):
                   method='linear')
 
     fig = go.Figure(data=go.Contour(
-        z=zi,
+        z=-zi,
         x=xi,
         y=yi,
         colorscale="RdBu",
-        ncontours=30
+
+
     ))
 
     fileName = " 2D Contour.png"
@@ -50,7 +51,6 @@ def plotlyContour2d(csvpath: str):
     image = os.sep.join([os.getcwd(), "Data", "Graphs", today + fileName])
 
     fig.write_image(image)
-    fig.show()
 
 
 def plotlyContour3d(csvpath: str):
@@ -73,18 +73,20 @@ def plotlyContour3d(csvpath: str):
                   method='linear')
 
     fig = go.Figure(data=go.Surface(
-        z=zi,
+        z=-zi,
         x=xi,
         y=yi,
         colorscale="RdBu",
+
     ))
 
+    fig.update_layout(height=800)
     fileName = " 3D Contour.png"
     today = date.today().strftime("%b-%d-%Y")
     image = os.sep.join([os.getcwd(), "Data", "Graphs", today + fileName])
 
+    # fig.show()
     fig.write_image(image)
-    fig.show()
 
 
 def plotlyGraph(csvpath: str):
@@ -122,7 +124,10 @@ def MapOverlay(csvpath: str) -> None:
                   method='linear')
 
     fig = px.density_mapbox(df, lat="Latitude", lon="Longitude", z="Depth_in_Feet",
-                            center=dict(lat=np.mean(lat), lon=np.mean(lon)), zoom=18, height=300)
+                            center=dict(lat=np.mean(lat), lon=np.mean(lon)),
+                            zoom=15,
+                            height=800,
+                            radius=7)
 
     fig.update_layout(mapbox_style="open-street-map")
     fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
@@ -134,17 +139,18 @@ def MapOverlay(csvpath: str) -> None:
     fig.write_image(image)
     fig.show()
 
-    import dash
-    import dash_core_components as dcc
-    import dash_html_components as html
+#     import dash
+#     import dash_core_components as dcc
+#     import dash_html_components as html
 
-    app = dash.Dash()
-    app.layout = html.Div([
-        dcc.Graph(figure=fig)
-    ])
+#     app = dash.Dash()
+#     app.layout = html.Div([
+#         dcc.Graph(figure=fig)
+#     ])
 
-    app.run_server()  # Turn off reloader if inside Jupyter
+#     app.run_server()  # Turn off reloader if inside Jupyter
 
-if __name__ == '__main__':
-    csvpath = "C:/Users/dasus/Documents/NCAS-M/NCAS/Data/echo_sounder/Mar-25-2022.csv"
-    MapOverlay(csvpath) 
+
+# if __name__ == '__main__':
+#     csvpath = "C:/Users/dasus/Documents/NCAS-M/NCAS/Data/echo_sounder/Mar-25-2022.csv"
+#     MapOverlay(csvpath)
