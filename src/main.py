@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-#WARNING:bokeh.io.export:file:///home/pi/NCAS-M/NCAS-UPRM/bokeh8g8he3kx.html 538:2167 "[bokeh]" "could not set initial ranges"
+# WARNING:bokeh.io.export:file:///home/pi/NCAS-M/NCAS-UPRM/bokeh8g8he3kx.html 538:2167 "[bokeh]" "could not set initial ranges"
 import serial
 import pynmea2
 import csv
@@ -13,10 +13,7 @@ from time import sleep, time
 from utils.graphs import MapOverlay, plotlyGraph
 
 
-
-
-
-#lib only available in rpi
+# lib only available in rpi
 from pijuice import PiJuice
 
 '''
@@ -90,6 +87,7 @@ def main() -> None:
             print(e)
             continue
 
+    os.system("python3 ../Remote/listenerDronekit.py")
     # Add all commands to the list of missions
     for cmd in cmds:
         missionlist.append(cmd)
@@ -103,7 +101,7 @@ def main() -> None:
     # for i in range(50): #stop deleting this
 
     clock = time()
-    #run loop for as long as the boat is in the water
+    # run loop for as long as the boat is in the water
     while scannable:
 
         # Translate NMEA data to sentences
@@ -143,7 +141,7 @@ def main() -> None:
         #currentWaypoint = vehicle.commands.next
 
         # print battery status every minute then reset counter
-        if time() - clock  > 30:
+        if time() - clock > 30:
             batteryStatus()
             clock = time()
 
