@@ -7,25 +7,6 @@ from dronekit import connect, LocationGlobal, VehicleMode
 This is the Subscriber and it is used to listen for the ngrok IP published by the RPI on the broker.
 Once it receives the IP it attempts to connect via ssh
 '''
-broker = "broker.hivemq.com"
-topic = "bio-optics/bob"
-port = 8884
-
-while 1:
-    try:
-
-        _vehicle_port = '/dev/ttyACM0'
-        vehicle = connect(_vehicle_port, baud=115200, heartbeat_timeout=5)
-
-        # get list of waypoints
-        cmds = vehicle.commands
-        cmds.download()
-        cmds.wait_ready()
-
-    except Exception as e:
-        print(e)
-        print("\n\n retrying in 3 sec...")
-        sleep(3)
 
 
 def returnHome():
@@ -80,6 +61,10 @@ def on_message(client, userdata, msg):
 def main():
     """Create the client connecion to the free broker in HiveMQ and
         receive the ngrok IP published by the Raspberry PI 4"""
+    broker = "broker.hivemq.com"
+    topic = "bio-optics/bob"
+    port = 8884
+
     client = mqtt.Client()
     client.connect(broker, port)
 
@@ -91,4 +76,21 @@ def main():
 
 
 if __name__ == "__main__":
+
+    while 1:
+        try:
+
+            _vehicle_port = '/dev/ttyACM0'
+            vehicle = connect(_vehicle_port, baud=115200, heartbeat_timeout=5)
+
+            # get list of waypoints
+            cmds = vehicle.commands
+            cmds.download()
+            cmds.wait_ready()
+
+        except Exception as e:
+            print(e)
+            print("\n\n retrying in 3 sec...")
+            sleep(3)
+
     main()
