@@ -9,34 +9,36 @@ def main():
     Run This Python Script install all the dependencies on any OS
     """
     subprocess.check_call([sys.executable, '-m', 'pip', 'install',
-                        'dronekit'])
+                           'dronekit'])
     subprocess.check_call([sys.executable, '-m', 'pip', 'install',
-                        'pyserial'])
+                           'pyserial'])
     subprocess.check_call([sys.executable, '-m', 'pip', 'install',
-                        'pynmea2'])
+                           'pynmea2'])
     subprocess.check_call([sys.executable, '-m', 'pip', 'install',
-                        'scipy'])
+                           'scipy==1.8.1'])
     subprocess.check_call([sys.executable, '-m', 'pip', 'install',
-                        'matplotlib'])
+                           'matplotlib'])
     subprocess.check_call([sys.executable, '-m', 'pip', 'install',
-                        'datetime'])
+                           'datetime'])
     subprocess.check_call([sys.executable, '-m', 'pip', 'install',
-                        'numpy'])
+                           'numpy'])
     subprocess.check_call([sys.executable, '-m', 'pip', 'install',
-                        'requests'])
+                           'requests'])
     subprocess.check_call([sys.executable, '-m', 'pip', 'install',
-                        'pandas'])
+                           'pandas'])
     subprocess.check_call([sys.executable, '-m', 'pip', 'install',
-                        'plotly'])    
+                           'plotly'])
     subprocess.check_call([sys.executable, '-m', 'pip', 'install',
-                        'requests'])
+                           'requests'])
     subprocess.check_call([sys.executable, '-m', 'pip', 'install',
-                        'selenium'])    
+                           'selenium'])
     subprocess.check_call([sys.executable, '-m', 'pip', 'install',
-                        'pysimplegui'])  
+                           'pysimplegui'])
     subprocess.check_call([sys.executable, '-m', 'pip', 'install',
-                        'seabreeze[pyseabreeze]'])
+                           'seabreeze[pyseabreeze]'])
     subprocess.check_call([sys.executable, '-m', 'pip', 'install',
-                        '-U', 'kaleido'])
+                           '-U', 'kaleido'])
+
+
 if __name__ == '__main__':
     main()
