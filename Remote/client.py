@@ -33,7 +33,7 @@ def main():
     hiveMQ = "broker.hivemq.com"
     client.connect(hiveMQ, 1883)
     message = getNgrok()
-    client.publish("SSH/NCAS-M", message)
+    client.publish("bio-optics/bob", message)
     client.disconnect()
 
 
