@@ -25,6 +25,7 @@ def main():
         [sys.executable, "-m", "pip", "install", "seabreeze[pyseabreeze]"]
     )
     subprocess.check_call([sys.executable, "-m", "pip", "install", "-U", "kaleido"])
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "-U", "paho-mqtt"])
 
 
 if __name__ == "__main__":
