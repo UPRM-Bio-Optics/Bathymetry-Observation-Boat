@@ -16,32 +16,33 @@ from utils.graphs import MapOverlay, plotlyGraph
 # lib only available in rpi
 from pijuice import PiJuice
 
-'''
+"""
 TODO
 - make scannable variable into function -> boolean
-'''
+"""
 
 
 def batteryStatus() -> None:
-    """ Prints Output of PiJuice Battery Hat Status 
+    """Prints Output of PiJuice Battery Hat Status
 
     Args: None
     """
     pijuice = PiJuice()
-    battery_level = pijuice.status.GetChargeLevel()['data']
-    battery_status = pijuice.status.GetStatus()['data']
-    battery_tempeture = pijuice.status.GetBatteryTemperature()['data']
-    print(f'\nPiJuice Battery Percentage is: {battery_level}%\n')
-    print(f'The PiJuice Battery Status is: {battery_status}\n')
+    battery_level = pijuice.status.GetChargeLevel()["data"]
+    battery_status = pijuice.status.GetStatus()["data"]
+    battery_tempeture = pijuice.status.GetBatteryTemperature()["data"]
+    print(f"\nPiJuice Battery Percentage is: {battery_level}%\n")
+    print(f"The PiJuice Battery Status is: {battery_status}\n")
     print(
-        f'The Pijuice Hat Temperture is: {battery_tempeture}°C  \nTempeture in debugging: 24°C\n')
+        f"The Pijuice Hat Temperture is: {battery_tempeture}°C  \nTempeture in debugging: 24°C\n"
+    )
 
 
 def isScannable(vehicle, cmds, missionlist) -> bool:
     """
     Args:
-        vehicle (DroneKit object): 
-        cmds (iterable): vehicle command / waypoints 
+        vehicle (DroneKit object):
+        cmds (iterable): vehicle command / waypoints
         missionlist (iterable): list created from cmds
 
     Returns:
@@ -55,8 +56,8 @@ def main() -> None:
     Main Program to be executed
     """
     # Initialize ports for pixhawk and echosounder
-    _vehicle_port = '/dev/ttyACM0'
-    _echosounder_port = '/dev/ttyUSB0'
+    _vehicle_port = "/dev/ttyACM0"
+    _echosounder_port = "/dev/ttyUSB0"
 
     # Initialize data lists
     lat = np.array([])
@@ -65,9 +66,9 @@ def main() -> None:
     today = date.today().strftime("%b-%d-%Y")
 
     # Create and initialize csv file
-    csvfile = open(os.getcwd() + '/Data/echo_sounder/' + today + '.csv', 'w')
+    csvfile = open(os.getcwd() + "/Data/echo_sounder/" + today + ".csv", "w")
     writer = csv.writer(csvfile)
-    _header = ['Latitude', 'Longitude', 'Depth_in_Feet']
+    _header = ["Latitude", "Longitude", "Depth_in_Feet"]
     writer.writerow(_header)
 
     # Pixhawk connection loop
@@ -83,11 +84,11 @@ def main() -> None:
             break
 
         except Exception as e:
-            print('Could not connect to Pixhawk')
+            print("Could not connect to Pixhawk")
             print(e)
             continue
 
-    os.system("python3 ../Remote/listenerDronekit.py")
+    # os.system("python3 ../Remote/listenerDronekit.py")
     # Add all commands to the list of missions
     for cmd in cmds:
         missionlist.append(cmd)
@@ -103,27 +104,25 @@ def main() -> None:
     clock = time()
     # run loop for as long as the boat is in the water
     while scannable:
-
         # Translate NMEA data to sentences
         try:
-            line = ser.readline().decode('ascii', 'ignore')
+            line = ser.readline().decode("ascii", "ignore")
             nmea_object = pynmea2.parse(line)
 
         except Exception:
             continue
 
         # Detect and record depth data sentences
-        if nmea_object.sentence_type == 'DBT' and nmea_object.depth_feet is not None:
-
-            print(f'Appending Depth Data {nmea_object.depth_feet}')
+        if nmea_object.sentence_type == "DBT" and nmea_object.depth_feet is not None:
+            print(f"Appending Depth Data {nmea_object.depth_feet}")
             topo = np.append(topo, float(nmea_object.depth_feet))
             row[2] = nmea_object.depth_feet
 
         # Detect and record location data sentences
-        elif nmea_object.sentence_type == 'GGA':
-
+        elif nmea_object.sentence_type == "GGA":
             print(
-                f'Appending GPS Data:  Lat = {nmea_object.latitude} Lon = {nmea_object.longitude}')
+                f"Appending GPS Data:  Lat = {nmea_object.latitude} Lon = {nmea_object.longitude}"
+            )
             lat = np.append(lat, nmea_object.latitude)
             lon = np.append(lon, nmea_object.longitude)
             row[0] = nmea_object.latitude
@@ -131,21 +130,21 @@ def main() -> None:
 
         # Write data to CSV file
         if all(row):
-            print('ADDING ROW CSV')
+            print("ADDING ROW CSV")
             writer.writerow(row)
-            csvfile.flush()    # Save current data to CSV
+            csvfile.flush()  # Save current data to CSV
             row = [None, None, None]
             sleep(0.1)
         # update scannable variable
         scannable = vehicle.armed  # and currentWaypoint <= len(missionlist)
-        #currentWaypoint = vehicle.commands.next
+        # currentWaypoint = vehicle.commands.next
 
         # print battery status every minute then reset counter
         if time() - clock > 30:
             batteryStatus()
             clock = time()
 
-    print('Done with Mission ')
+    print("Done with Mission ")
 
     # Graph CSV data
     try:
@@ -153,9 +152,8 @@ def main() -> None:
         MapOverlay(csvfile.name)
 
     except Exception as e:
-
-        print(' AT least you tried graphs :|')
-        row = ['could not graph', 'error', e]
+        print(" AT least you tried graphs :|")
+        row = ["could not graph", "error", e]
         writer.writerow(row)
 
     # Close CSV file and EchoSounder Port
@@ -163,5 +161,5 @@ def main() -> None:
     ser.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
