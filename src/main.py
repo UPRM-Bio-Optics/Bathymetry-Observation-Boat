@@ -103,46 +103,57 @@ def main() -> None:
 
     clock = time()
     # run loop for as long as the boat is in the water
-    while scannable:
-        # Translate NMEA data to sentences
-        try:
-            line = ser.readline().decode("ascii", "ignore")
-            nmea_object = pynmea2.parse(line)
-
-        except Exception:
+    while True:
+        print("Waiting for vehicle to be armed...")
+        scannable = vehicle.armed
+        sleep(1)
+        if not scannable:
             continue
+        while scannable:
+            print("Vehicle is armed!")
+            # Translate NMEA data to sentences
+            try:
+                line = ser.readline().decode("ascii", "ignore")
+                nmea_object = pynmea2.parse(line)
 
-        # Detect and record depth data sentences
-        if nmea_object.sentence_type == "DBT" and nmea_object.depth_feet is not None:
-            print(f"Appending Depth Data {nmea_object.depth_feet}")
-            topo = np.append(topo, float(nmea_object.depth_feet))
-            row[2] = nmea_object.depth_feet
+            except Exception:
+                continue
 
-        # Detect and record location data sentences
-        elif nmea_object.sentence_type == "GGA":
-            print(
-                f"Appending GPS Data:  Lat = {nmea_object.latitude} Lon = {nmea_object.longitude}"
-            )
-            lat = np.append(lat, nmea_object.latitude)
-            lon = np.append(lon, nmea_object.longitude)
-            row[0] = nmea_object.latitude
-            row[1] = nmea_object.longitude
+            # Detect and record depth data sentences
+            if nmea_object.sentence_type == "DBT" and nmea_object.depth_feet is not None:
+                print(f"Appending Depth Data {nmea_object.depth_feet}")
+                topo = np.append(topo, float(nmea_object.depth_feet))
+                row[2] = nmea_object.depth_feet
 
-        # Write data to CSV file
-        if all(row):
-            print("ADDING ROW CSV")
-            writer.writerow(row)
-            csvfile.flush()  # Save current data to CSV
-            row = [None, None, None]
-            sleep(0.1)
-        # update scannable variable
-        scannable = vehicle.armed  # and currentWaypoint <= len(missionlist)
-        # currentWaypoint = vehicle.commands.next
+            # Detect and record location data sentences
+            elif nmea_object.sentence_type == "GGA":
+                print(
+                    f"Appending GPS Data:  Lat = {nmea_object.latitude} Lon = {nmea_object.longitude}"
+                )
+                lat = np.append(lat, nmea_object.latitude)
+                lon = np.append(lon, nmea_object.longitude)
+                row[0] = nmea_object.latitude
+                row[1] = nmea_object.longitude
 
-        # print battery status every minute then reset counter
-        if time() - clock > 30:
-            batteryStatus()
-            clock = time()
+            # Write data to CSV file
+            if all(row):
+                print("ADDING ROW CSV")
+                writer.writerow(row)
+                csvfile.flush()  # Save current data to CSV
+                row = [None, None, None]
+                sleep(0.1)
+            # update scannable variable
+            scannable = vehicle.armed  # and currentWaypoint <= len(missionlist)
+            # currentWaypoint = vehicle.commands.next
+
+            # print battery status every minute then reset counter
+            if time() - clock > 30:
+                batteryStatus()
+                clock = time()
+            
+        break
+
+            
 
     print("Done with Mission ")
 
