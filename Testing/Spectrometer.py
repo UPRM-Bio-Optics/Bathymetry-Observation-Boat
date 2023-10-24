@@ -2,6 +2,7 @@ import os
 import csv
 import numpy as np
 import plotly.express as px
+import pandas as pd
 from typing import Any
 from datetime import datetime
 
@@ -14,9 +15,12 @@ from seabreeze.spectrometers import Spectrometer
 class SpectrometerWrapper:
     wavelengthsBuffer = []
     intensitiesBuffer = []
-    device = None
 
-    def __init__(self, serialNumber: int = None):
+    device = None
+    outputFile = None
+    writer = None
+
+    def __init__(self, serialNumber: int = None) -> None:
         """
         Initialize spectrometer object class; This is a wrapper to the
         PySeaBreeze Spectrometer class to include several methods such as noise reduction
@@ -32,7 +36,15 @@ class SpectrometerWrapper:
 
         self.device.integration_time_micros(100000)
 
-    def reduceNoise(self):
+        self.today = datetime.now().strftime("%m/%d/%Y, %H/%M/%S")
+        self.outputFile = open(
+            os.getcwd() + "/Data/Spectrometer/csv/" + today + ".csv", "w"
+        )
+        self.writer = csv.writer(self.outputFile)
+        _header = ["Wavelengths (nm)", "Intensities (a.u)"]
+        self.writer.writerow(_header)
+
+    def reduceNoise(self) -> None:
         """Removes duplicates from wavelengths list and condenses them to a single entry with
         the average of the associated intensities;
         Note: Uses current wavelengths and intensities buffer values;
@@ -58,13 +70,12 @@ class SpectrometerWrapper:
         """
         self.reduceNoise(self.device.spectrum())
 
-    def plotBuffer(self):
+    def plotBuffer(self) -> None:
         """
         generates plotly plot using buffered values of wavelengths and intensities
         This graph is simply a sample from the sensor; if a more comprehensive visualization is needed
         use SpectrometerWrapper.plotAll()
         """
-        today = datetime.now().strftime("%m/%d/%Y, %H/%M/%S")
 
         fig = px.line(
             x=self.wavelengthsBuffer,
@@ -74,9 +85,18 @@ class SpectrometerWrapper:
         )
         fig.show()
 
-        filename = os.getcwd() + "/Data/Spectrometer/plots/" + today + ".png"
+        filename = os.getcwd() + "/Data/Spectrometer/plots/" + self.today + ".png"
         fig.write_image(filename)
         # plt.savefig(os.getcwd() + "/Data/Spectrometer/plots/" + today + ".png")
+
+    @staticmethod
+    def plot(csvpath):
+        df = pd.read_csv(csvpath)
+        fig = px.line(
+            data_frame=df,
+            labels={"x": "Wavelength (nm)", "y": "Intensity (a.u)"},
+            title="Intensity vs Wavelength",
+        )
 
 
 def spectro():
