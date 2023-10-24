@@ -10,7 +10,7 @@ def on_connect(client, userdata, flags, rc):
     """ Print connection info when connection is established.
     """
     print("Connected with result code "+str(rc))
-    client.subscribe("SSH/NCAS-M")
+    client.subscribe("bio-optics/bob")
 
 
 def on_message(client, userdata, msg):
@@ -22,7 +22,7 @@ def on_message(client, userdata, msg):
     ip = msg.payload.decode().rsplit("//")[-1]
     ip, port = ip.rsplit(":")
     try:
-        os.system(f"ssh root@{ip} -p {port}")
+        os.system(f"ssh pi@{ip} -p {port}")
     except Exception as err:
         print(err)
     client.disconnect()
