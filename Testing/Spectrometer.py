@@ -1,7 +1,7 @@
 import os
 import csv
 import numpy as np
-import matplotlib.pyplot as plt
+import plotly.express as px
 from typing import Any
 from datetime import datetime
 
@@ -11,39 +11,72 @@ seabreeze.use("pyseabreeze")
 from seabreeze.spectrometers import Spectrometer
 
 
-def reduceNoise(
-    wavelengths: list, intensities: list
-) -> tuple[list[Any], list[float | Any]]:
-    """Removes duplicates from wavelengths list and condenses them to a single entry with
-    the average of the associated intensities
+class SpectrometerWrapper:
+    wavelengthsBuffer = []
+    intensitiesBuffer = []
+    device = None
 
-    Args:
-        wavelengths (list): list of wavelengths spectrum
-        intensities (list): list of intensities spectrum
-    Returns:
-        wavelengths (list): list of wavelengths spectrum with unique entries
-        intensities (list): list of intensities spectrum with unique entries
-    """
-    data = {}
-    sum = 0
-    sumflag = False
-    count = 1
-    for i in range(len(wavelengths)):
-        if wavelengths[i] in data:
-            sum += intensities[i]
-            sumflag = True
-            count += 1
-        elif sumflag:
-            data[wavelengths[i - 1]] = sum / count
-            sumflag = False
-            count = 1
-            data[wavelengths[i]] = intensities[i]
-            sum = intensities[i]
+    def __init__(self, serialNumber: int = None):
+        """
+        Initialize spectrometer object class; This is a wrapper to the
+        PySeaBreeze Spectrometer class to include several methods such as noise reduction
+        Data correction from other spectrometer data
+
+        Args:
+            serialNumber (int, optional): if initializing spectrometer from serial number instead of through from first availvable . Defaults to None.
+        """
+        if serialNumber:
+            self.device = Spectrometer.from_serial_number(serialNumber)
         else:
-            data[wavelengths[i]] = intensities[i]
-            sum = intensities[i]
+            self.device = Spectrometer.from_first_available()
 
-    return list(data.keys()), list(data.values())
+        self.device.integration_time_micros(100000)
+
+    def reduceNoise(self):
+        """Removes duplicates from wavelengths list and condenses them to a single entry with
+        the average of the associated intensities;
+        Note: Uses current wavelengths and intensities buffer values;
+
+        """
+        result: dict = {}
+        duplicateCount: float = 1
+        sumDuplicates: float = 0
+        for i in range(len(self.wavelengthsBuffer)):
+            if result.has_key(self.wavelengthsBuffer[i]):
+                duplicateCount += 1
+                sumDuplicates += self.intensitiesBuffer[i]
+                result[self.wavelengthsBuffer[i]] = sumDuplicates / duplicateCount
+            else:
+                result[self.wavelengthsBuffer[i]] = result[self.intensitiesBuffer[i]]
+
+        self.wavelengthsBuffer, self.intensitiesBuffer = zip(*result.items())
+
+    def fillBuffer(self) -> None:
+        """
+        Updates buffer with new sample
+
+        """
+        self.reduceNoise(self.device.spectrum())
+
+    def plotBuffer(self):
+        """
+        generates plotly plot using buffered values of wavelengths and intensities
+        This graph is simply a sample from the sensor; if a more comprehensive visualization is needed
+        use SpectrometerWrapper.plotAll()
+        """
+        today = datetime.now().strftime("%m/%d/%Y, %H/%M/%S")
+
+        fig = px.line(
+            x=self.wavelengthsBuffer,
+            y=self.intensitiesBuffer,
+            labels={"x": "Wavelength (nm)", "y": "Intensity (a.u)"},
+            title="Intensity vs Wavelength Sample",
+        )
+        fig.show()
+
+        filename = os.getcwd() + "/Data/Spectrometer/plots/" + today + ".png"
+        fig.write_image(filename)
+        # plt.savefig(os.getcwd() + "/Data/Spectrometer/plots/" + today + ".png")
 
 
 def spectro():
@@ -69,13 +102,6 @@ def spectro():
         intensity = intensities[i]
         row = [wavelength, intensity]
         writer.writerow(row)
-
-    plt.figure()
-    plt.xlabel("Wavelengths(nm)")
-    plt.ylabel("Intensities(a.u)")
-    plt.title("Spectrometer Data")
-    plt.plot(wavelengths, intensities, "-m")
-    plt.savefig(os.getcwd() + "/Data/Spectrometer/plots/" + today + ".png")
 
 
 if __name__ == "__main__":
