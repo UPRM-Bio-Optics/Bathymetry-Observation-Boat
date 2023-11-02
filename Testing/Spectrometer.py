@@ -38,28 +38,29 @@ class SpectrometerWrapper:
 
         self.today = datetime.now().strftime("%m/%d/%Y, %H/%M/%S")
         self.outputFile = open(
-            os.getcwd() + "/Data/Spectrometer/csv/" + today + ".csv", "w"
+            os.getcwd() + "/Data/Spectrometer/csv/" + self.today + ".csv", "w"
         )
         self.writer = csv.writer(self.outputFile)
         _header = ["Wavelengths (nm)", "Intensities (a.u)"]
         self.writer.writerow(_header)
 
     def reduceNoise(self) -> None:
-        """Removes duplicates from wavelengths list and condenses them to a single entry with
-        the average of the associated intensities;
+        """Removes duplicate intensities values from wavelengths list and condenses them to a single entry with
+        the average of the associated intensities for a given wavelength;
         Note: Uses current wavelengths and intensities buffer values;
 
         """
         result: dict = {}
-        duplicateCount: float = 1
-        sumDuplicates: float = 0
-        for i in range(len(self.wavelengthsBuffer)):
-            if result.has_key(self.wavelengthsBuffer[i]):
-                duplicateCount += 1
-                sumDuplicates += self.intensitiesBuffer[i]
-                result[self.wavelengthsBuffer[i]] = sumDuplicates / duplicateCount
-            else:
-                result[self.wavelengthsBuffer[i]] = result[self.intensitiesBuffer[i]]
+        duplicateSum = 0
+        duplicateCount = 0
+        for i in range(len(self.wavelengthsBuffer) - 1):
+            duplicateCount += 1
+            duplicateSum += self.intensitiesBuffer[i]
+            if self.wavelengthsBuffer[i] != self.wavelengthsBuffer[i + 1]:
+                result[self.wavelengthsBuffer[i]] += duplicateSum / duplicateCount
+
+                duplicateCount = 0
+                duplicateSum = 0
 
         self.wavelengthsBuffer, self.intensitiesBuffer = zip(*result.items())
 
@@ -68,7 +69,8 @@ class SpectrometerWrapper:
         Updates buffer with new sample
 
         """
-        self.reduceNoise(self.device.spectrum())
+        self.wavelengthsBuffer, self.intensitiesBuffer = self.device.spectrum()
+        self.reduceNoise()
 
     def plotBuffer(self) -> None:
         """
@@ -90,7 +92,7 @@ class SpectrometerWrapper:
         # plt.savefig(os.getcwd() + "/Data/Spectrometer/plots/" + today + ".png")
 
     @staticmethod
-    def plot(csvpath):
+    def plot(csvpath: str):
         df = pd.read_csv(csvpath)
         fig = px.line(
             data_frame=df,
@@ -100,28 +102,9 @@ class SpectrometerWrapper:
 
 
 def spectro():
-    spec = Spectrometer.from_first_available()
-    spec.integration_time_micros(100000)
-
-    wavelengths, intensities = spec.spectrum()
-    wavelengths = np.round(wavelengths)
-    intensities = np.round(intensities)
-
-    wavelengths, intensities = reduceNoise(
-        wavelengths=wavelengths, intensities=intensities
-    )
-
-    today = datetime.now().strftime("%b-%d-%Y")
-    csvfile = open(os.getcwd() + "/Data/Spectrometer/csv/" + today + ".csv", "w")
-    writer = csv.writer(csvfile)
-    _header = ["Wavelengths (nm)", "Intensities (a.u)"]
-    writer.writerow(_header)
-
-    for i in range(len(wavelengths)):
-        wavelength = wavelengths[i]
-        intensity = intensities[i]
-        row = [wavelength, intensity]
-        writer.writerow(row)
+    spec = SpectrometerWrapper()
+    spec.fillBuffer()
+    spec.plotBuffer()
 
 
 if __name__ == "__main__":
