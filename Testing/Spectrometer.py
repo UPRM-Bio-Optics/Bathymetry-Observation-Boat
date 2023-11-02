@@ -36,7 +36,7 @@ class SpectrometerWrapper:
 
         self.device.integration_time_micros(100000)
 
-        self.today = datetime.now().strftime("%m/%d/%Y")
+        self.today = datetime.now().strftime("%m-%d-%Y")
         self.outputFile = open(
             os.getcwd() + "/Data/Spectrometer/csv/" + self.today + ".csv", "w"
         )
