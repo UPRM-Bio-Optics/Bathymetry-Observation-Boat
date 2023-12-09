@@ -94,8 +94,7 @@ class SpectrometerSystem:
         """
 
         fig = px.line(
-            x=self.wavelengthsBuffer,
-            y=self.intensitiesBuffer,
+            self.reflectance,
             labels={"x": "Wavelength (nm)", "y": "Intensity (a.u)"},
             title="Intensity vs Wavelength Sample",
         )
