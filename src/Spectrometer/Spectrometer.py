@@ -38,15 +38,25 @@ class SpectrometerSystem:
         Args:
             serialNumber (int, optional): if initializing spectrometer from serial number instead of through from first availvable . Defaults to None.
         """
-        if skySerialNumber:
-            self.skySpectrometer = Spectrometer.from_serial_number(skySerialNumber)
-        else:
-            self.skySpectrometer = Spectrometer.from_first_available()
+        
+        try:
+            
+            if skySerialNumber:
+                self.skySpectrometer = Spectrometer.from_serial_number(skySerialNumber)
+            else:
+                self.skySpectrometer = Spectrometer.from_first_available()
 
-        if seaSerialNumber:
-            self.seaSpectrometer = Spectrometer.from_serial_number(seaSerialNumber)
-        else:
-            self.seaSpectrometer = Spectrometer.from_first_available()
+            if seaSerialNumber:
+                self.seaSpectrometer = Spectrometer.from_serial_number(seaSerialNumber)
+            else:
+                self.seaSpectrometer = Spectrometer.from_first_available()
+        
+        except Exception as e:
+            
+            print("fuck")
+            print(e)
+            exit()
+        
 
         self.skySpectrometer.integration_time_micros(100000)
         self.seaSpectrometer.integration_time_micros(100000)
@@ -130,7 +140,7 @@ class SpectrometerSystem:
         """
         generates plotly plot using buffered values of wavelengths and reflectance
         This graph is simply a sample from the sensor; if a more comprehensive visualization is needed
-        use SpectrometerWrapper.plotAll()
+        use plotReflectance() 
         """
 
         fig = px.line(
@@ -183,15 +193,16 @@ def plotReflectance(csvpath: str):
 
 
 def spectro():
+    
     twins = SpectrometerSystem()
 
     for i in range(10):
         twins.fillBuffer()
         twins.plotBufferReflectance()
         time.sleep(1)
-        # heres
-    pass
+        
+    
 
 
 if __name__ == "__main__":
-    pass
+    spectro()
