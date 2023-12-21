@@ -14,7 +14,7 @@ import sys
 # caution: path[0] is reserved for script path (or '' in REPL)
 sys.path.insert(1, 'C:\\Users\\dasus\\Documents\\NCAS-M\\NCAS\\src\\utils')
 
-from graphs import MapOverlay, plotlyContour2d, plotlyContour3d
+#from graphs import MapOverlay, plotlyContour2d, plotlyContour3d
 #import dronekit_sitl
 
   
@@ -103,6 +103,7 @@ def spectro():
 
 if __name__ == "__main__": 
     
-    csvpath = "C:/Users/dasus/Documents/NCAS-M/NCAS/Data/echo_sounder/Jul-26-2022.csv"
-    plotlyContour2d(csvpath)
+    # csvpath = "C:/Users/dasus/Documents/NCAS-M/NCAS/Data/echo_sounder/Jul-26-2022.csv"
+    # plotlyContour2d(csvpath)
     #graph(csvpath)   
+    spectro()

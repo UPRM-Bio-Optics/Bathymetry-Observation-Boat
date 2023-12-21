@@ -31,9 +31,11 @@ class SpectrometerSystem:
         self, skySerialNumber: int = None, seaSerialNumber: int = None
     ) -> None:
         """
-        Initialize spectrometer object class; This is a wrapper to the
+        Initialize spectrometer system object class; This is a wrapper to the
         PySeaBreeze Spectrometer class to include several methods such as noise reduction
         Data correction from other spectrometer data
+        
+        This library will only work with ocean insight spectrometers 
 
         Args:
             serialNumber (int, optional): if initializing spectrometer from serial number instead of through from first availvable . Defaults to None.
@@ -45,12 +47,12 @@ class SpectrometerSystem:
                 self.skySpectrometer = Spectrometer.from_serial_number(skySerialNumber)
             else:
                 self.skySpectrometer = Spectrometer.from_first_available()
-
+            print("Sky Success")
             if seaSerialNumber:
                 self.seaSpectrometer = Spectrometer.from_serial_number(seaSerialNumber)
             else:
                 self.seaSpectrometer = Spectrometer.from_first_available()
-        
+            print(" Sea Success")
         except Exception as e:
             
             print("fuck")
@@ -87,12 +89,16 @@ class SpectrometerSystem:
         for i in range(len(wavelengthsBuffer) - 1):
             duplicateCount += 1
             duplicateSum += intensitiesBuffer[i]
-            if wavelengthsBuffer[i] != self.wavelengthsBuffer[i + 1]:
-                result[wavelengthsBuffer[i]] += duplicateSum / duplicateCount
+            
+            
+            if wavelengthsBuffer[i] != wavelengthsBuffer[i + 1]:
+        
+                    
+                    result[round(wavelengthsBuffer[i], 0)] = duplicateSum / duplicateCount
 
-                duplicateCount = 0
-                duplicateSum = 0
-
+                    duplicateCount = 0
+                    duplicateSum = 0
+            
         return result
 
     def fillBuffer(self) -> None:
@@ -142,18 +148,20 @@ class SpectrometerSystem:
         This graph is simply a sample from the sensor; if a more comprehensive visualization is needed
         use plotReflectance() 
         """
-
+        ref = pd.Series(self.reflectance)
         fig = px.line(
-            self.reflectance,
-            labels={"x": "Wavelength (nm)", "y": "Intensity (a.u)"},
-            title="Intensity vs Wavelength Sample",
+            ref,
+            labels={"index": "Wavelength (nm)", "value": "Reflectance "},
+            title="Reflectance vs Wavelength Sample",
         )
+        fig.update_layout(showlegend=False)
         fig.show()
 
-        # filename = os.getcwd() + "/Data/Spectrometer/plots/" + self.today + ".png"
+        filename = os.getcwd() + "/Data/Spectrometer/plots/" + self.today + ".png"
         # fig.write_image(filename)
         # plt.savefig(os.getcwd() + "/Data/Spectrometer/plots/" + today + ".png")
-
+       
+        fig.write_image(filename)
 
 # =====================================================================================================================
 def plotReflectance(csvpath: str):
@@ -196,10 +204,9 @@ def spectro():
     
     twins = SpectrometerSystem()
 
-    for i in range(10):
-        twins.fillBuffer()
-        twins.plotBufferReflectance()
-        time.sleep(1)
+    twins.fillBuffer()
+    twins.plotBufferReflectance()
+    time.sleep(1)
         
     
 
